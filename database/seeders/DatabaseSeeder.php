@@ -22,12 +22,15 @@ class DatabaseSeeder extends Seeder
 
         // Create Admin User
         $adminUser = User::firstOrCreate([
-            'email' => 'admin@example.com',
+            'email' => 'admin@gmail.com',
         ], [
             'name' => 'Admin User',
             'password' => \Illuminate\Support\Facades\Hash::make('password'),
         ]);
 
         $adminUser->assignRole($adminRole);
+
+        // Call full inventory seeder
+        $this->call(InventorySeeder::class);
     }
 }

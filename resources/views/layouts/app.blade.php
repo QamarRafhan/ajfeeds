@@ -16,8 +16,31 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Tailwind CSS (Play CDN) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
         /* BASE THEME (LIGHT BLUE - PREMIUM WHITE & BLUE) */
@@ -29,6 +52,7 @@
             --text-main: #1e293b;
             --text-muted: #64748b;
             --border: #e2e8f0;
+            --hover-text: #ffffff;
         }
 
         .theme-light_blue {
@@ -41,6 +65,7 @@
             --text-main: #0f172a;
             --text-muted: #475569;
             --border: #e0f2fe;
+            --hover-text: #ffffff;
         }
 
         .theme-midnight {
@@ -53,6 +78,7 @@
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
             --border: #1e293b;
+            --hover-text: #ffffff;
         }
 
         .theme-modern_dark {
@@ -65,6 +91,7 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #334155;
+            --hover-text: #ffffff;
         }
 
         body {
@@ -75,7 +102,7 @@
         
         .bg-sidebar { background-color: var(--bg-sidebar) !important; }
         .border-sidebar-border { border-color: var(--sidebar-border) !important; }
-        .bg-sidebar-header { background-color: color-mix(in srgb, var(--bg-sidebar), black 10%) !important; }
+        .bg-sidebar-header { background-color: rgba(0,0,0,0.05) !important; }
 
         main {
             background-color: var(--bg-main) !important;
@@ -102,10 +129,33 @@
             background-color: var(--bg-main) !important;
         }
 
+        /* Input Field Fixes */
         input, select, textarea {
             background-color: var(--bg-card) !important;
-            border-color: var(--border) !important;
+            border: 1px solid var(--border) !important;
             color: var(--text-main) !important;
+            border-radius: 0.375rem !important;
+            padding: 0.5rem 0.75rem !important;
+            width: 100%;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            ring: 2px solid var(--primary) !important;
+            border-color: var(--primary) !important;
+        }
+
+        /* Hover Mix Fixes */
+        .hover\:bg-indigo-600:hover, .hover\:bg-primary:hover, .hover\:bg-indigo-700:hover {
+            background-color: var(--primary-hover) !important;
+            color: #ffffff !important;
+        }
+        
+        .hover\:text-white:hover {
+            color: #ffffff !important;
+        }
+
+        .text-white {
+            color: #ffffff !important;
         }
 
         /* Shadow Enhancements */
@@ -116,7 +166,7 @@
         /* Select2 Custom Styling */
         .select2-container--default .select2-selection--single {
             background-color: var(--bg-card) !important;
-            border-color: var(--border) !important;
+            border: 1px solid var(--border) !important;
             color: var(--text-main) !important;
             height: 42px;
             padding-top: 5px;
@@ -126,15 +176,17 @@
         }
         .select2-dropdown {
             background-color: var(--bg-card) !important;
-            border-color: var(--border) !important;
+            border: 1px solid var(--border) !important;
             color: var(--text-main) !important;
         }
         .select2-results__option--highlighted[aria-selected] {
             background-color: var(--primary) !important;
+            color: var(--hover-text) !important;
         }
         .select2-search__field {
             background-color: var(--bg-main) !important;
             color: var(--text-main) !important;
+            border: 1px solid var(--border) !important;
         }
 
         /* Table Aesthetics */
@@ -146,6 +198,10 @@
             font-weight: 700 !important;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--border) !important;
+        }
+        table td {
+            border-bottom: 1px solid var(--border) !important;
         }
 
         /* Profile Photo Styles */
