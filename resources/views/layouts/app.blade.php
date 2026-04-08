@@ -129,24 +129,73 @@
             background-color: var(--bg-main) !important;
         }
 
-        /* Input Field Fixes */
-        input, select, textarea {
+        /* Input Field Fixes - Specific selection to avoid breaking checkboxes/radios/swal */
+        input[type="text"]:not(.swal2-input), 
+        input[type="email"]:not(.swal2-input), 
+        input[type="password"]:not(.swal2-input), 
+        input[type="number"]:not(.swal2-input), 
+        input[type="tel"]:not(.swal2-input), 
+        input[type="url"]:not(.swal2-input), 
+        select:not(.swal2-select), 
+        textarea:not(.swal2-textarea) {
             background-color: var(--bg-card) !important;
             border: 1px solid var(--border) !important;
             color: var(--text-main) !important;
             border-radius: 0.375rem !important;
             padding: 0.5rem 0.75rem !important;
-            width: 100%;
+            width: 100% !important;
+            display: block !important;
         }
         
-        input:focus, select:focus, textarea:focus {
+        input[type="text"]:focus, 
+        input[type="email"]:focus, 
+        select:focus, 
+        textarea:focus {
             ring: 2px solid var(--primary) !important;
             border-color: var(--primary) !important;
         }
 
-        /* Hover Mix Fixes */
-        .hover\:bg-indigo-600:hover, .hover\:bg-primary:hover, .hover\:bg-indigo-700:hover {
+        /* Checkbox & Radio Styling */
+        input[type="checkbox"], 
+        input[type="radio"] {
+            appearance: checkbox !important;
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+            border-radius: 0.25rem !important;
+            border: 2px solid var(--border) !important;
+            background-color: var(--bg-card) !important;
+            color: var(--primary) !important;
+            cursor: pointer !important;
+            display: inline-block !important;
+            padding: 0 !important;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+        }
+
+        /* Hover Mix Fixes & Contrast Improvements */
+        .hover\:bg-indigo-600:hover, 
+        .hover\:bg-primary:hover, 
+        .hover\:bg-indigo-700:hover {
             background-color: var(--primary-hover) !important;
+            color: #ffffff !important;
+        }
+        
+        /* Dropdown & List Hover Fixes (Ensuring text doesn't vanish on light hover) */
+        .hover\:bg-gray-50:hover, 
+        .hover\:bg-gray-100:hover, 
+        .hover\:bg-indigo-50:hover {
+            background-color: rgba(79, 70, 229, 0.1) !important;
+            color: var(--primary) !important;
+        }
+
+        .theme-midnight .hover\:bg-gray-50:hover, 
+        .theme-midnight .hover\:bg-indigo-50:hover,
+        .theme-modern_dark .hover\:bg-gray-50:hover, 
+        .theme-modern_dark .hover\:bg-indigo-50:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
             color: #ffffff !important;
         }
         
@@ -181,27 +230,12 @@
         }
         .select2-results__option--highlighted[aria-selected] {
             background-color: var(--primary) !important;
-            color: var(--hover-text) !important;
+            color: #ffffff !important;
         }
         .select2-search__field {
             background-color: var(--bg-main) !important;
             color: var(--text-main) !important;
             border: 1px solid var(--border) !important;
-        }
-
-        /* Table Aesthetics */
-        table thead {
-            background-color: var(--bg-main) !important;
-        }
-        table th {
-            color: var(--text-muted) !important;
-            font-weight: 700 !important;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 2px solid var(--border) !important;
-        }
-        table td {
-            border-bottom: 1px solid var(--border) !important;
         }
 
         /* Profile Photo Styles */
@@ -210,6 +244,43 @@
             width: 32px;
             height: 32px;
             border-radius: 9999px;
+        }
+
+        /* SweetAlert2 Theme Integration */
+        .swal2-popup {
+            background-color: var(--bg-card) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 1rem !important;
+        }
+        .swal2-title, .swal2-html-container, .swal2-content {
+            color: var(--text-main) !important;
+        }
+        .swal2-toast {
+            width: auto !important;
+            min-width: 320px !important;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+            border: 1px solid var(--border) !important;
+        }
+        .swal2-confirm {
+            background-color: var(--primary) !important;
+            color: #ffffff !important;
+        }
+        .swal2-cancel {
+            background-color: #6b7280 !important;
+            color: #ffffff !important;
+        }
+        .swal2-container {
+            z-index: 9999 !important;
+        }
+        
+        .theme-midnight .swal2-success-circular-line-left,
+        .theme-midnight .swal2-success-circular-line-right,
+        .theme-midnight .swal2-success-fix,
+        .theme-modern_dark .swal2-success-circular-line-left,
+        .theme-modern_dark .swal2-success-circular-line-right,
+        .theme-modern_dark .swal2-success-fix {
+            background-color: var(--bg-card) !important;
         }
     </style>
 </head>
@@ -354,7 +425,13 @@
                     timer: 3000,
                     showConfirmButton: false,
                     toast: true,
-                    position: 'top-end'
+                    position: 'top-end',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
                 });
             @endif
 
@@ -366,7 +443,13 @@
                     timer: 4500,
                     showConfirmButton: false,
                     toast: true,
-                    position: 'top-end'
+                    position: 'top-end',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
                 });
             @endif
 
