@@ -1,0 +1,70 @@
+<aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="absolute z-40 flex flex-col w-64 h-screen transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 {{ Auth::check() && Auth::user()->theme === 'dark' ? 'bg-gray-900 text-gray-300 shadow-xl' : 'bg-white text-gray-600 border-r border-gray-200' }}">
+    
+    <!-- Sidebar Header / Logo -->
+    <div class="flex items-center h-16 px-6 py-4 {{ Auth::check() && Auth::user()->theme === 'dark' ? 'bg-gray-950' : 'border-b border-gray-100 bg-white' }}">
+        <a href="{{ route('dashboard') }}" class="flex items-center text-lg font-black tracking-wider uppercase {{ Auth::check() && Auth::user()->theme === 'dark' ? 'text-white' : 'text-gray-900' }}">
+            <svg class="w-8 h-8 mr-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            App Panel
+        </a>
+    </div>
+
+    <!-- Sidebar Links Context Menu -->
+    <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('dashboard') ? 'bg-indigo-600 text-white shadow' : (Auth::check() && Auth::user()->theme === 'dark' ? 'hover:bg-gray-800 hover:text-white text-gray-400' : 'hover:bg-indigo-50 hover:text-indigo-600 text-gray-700') }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            Dashboard
+        </a>
+        
+        <p class="px-4 pt-6 pb-2 text-xs font-bold uppercase tracking-wider {{ Auth::check() && Auth::user()->theme === 'dark' ? 'text-gray-600' : 'text-gray-400' }}">Inventory Settings</p>
+
+        <a href="{{ route('categories.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('categories.*') ? 'bg-indigo-600 text-white shadow' : (Auth::check() && Auth::user()->theme === 'dark' ? 'hover:bg-gray-800 hover:text-white text-gray-400' : 'hover:bg-indigo-50 hover:text-indigo-600 text-gray-700') }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+            Product Classes
+        </a>
+
+        <a href="{{ route('products.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('products.*') ? 'bg-indigo-600 text-white shadow' : (Auth::check() && Auth::user()->theme === 'dark' ? 'hover:bg-gray-800 hover:text-white text-gray-400' : 'hover:bg-indigo-50 hover:text-indigo-600 text-gray-700') }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+            Master Catalog
+        </a>
+
+        <a href="{{ route('suppliers.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('suppliers.*') ? 'bg-indigo-600 text-white shadow' : (Auth::check() && Auth::user()->theme === 'dark' ? 'hover:bg-gray-800 hover:text-white text-gray-400' : 'hover:bg-indigo-50 hover:text-indigo-600 text-gray-700') }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            Brand Suppliers
+        </a>
+        
+        <p class="px-4 pt-6 pb-2 text-xs font-bold uppercase tracking-wider {{ Auth::check() && Auth::user()->theme === 'dark' ? 'text-gray-600' : 'text-gray-400' }}">Finance & Trading</p>
+
+        <a href="{{ route('purchases.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('purchases.*') ? 'bg-indigo-600 text-white shadow' : (Auth::check() && Auth::user()->theme === 'dark' ? 'hover:bg-gray-800 hover:text-white text-gray-400' : 'hover:bg-indigo-50 hover:text-indigo-600 text-gray-700') }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            Restock (Inbound)
+        </a>
+
+        <a href="{{ route('orders.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('orders.*') ? 'bg-indigo-600 text-white shadow' : (Auth::check() && Auth::user()->theme === 'dark' ? 'hover:bg-gray-800 hover:text-white text-gray-400' : 'hover:bg-indigo-50 hover:text-indigo-600 text-gray-700') }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            Point of Sale
+        </a>
+        
+        <p class="px-4 pt-6 pb-2 text-xs font-bold uppercase tracking-wider {{ Auth::check() && Auth::user()->theme === 'dark' ? 'text-gray-600' : 'text-gray-400' }}">Monitoring</p>
+
+        @role('Admin')
+        <a href="{{ route('users.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('users.*') ? 'bg-indigo-600 text-white shadow' : (Auth::check() && Auth::user()->theme === 'dark' ? 'hover:bg-gray-800 hover:text-white text-gray-400' : 'hover:bg-indigo-50 hover:text-indigo-600 text-gray-700') }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            Staff Accounts
+        </a>
+        @endrole
+        
+        <a href="{{ route('reports.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('reports.*') ? 'bg-indigo-600 text-white shadow' : (Auth::check() && Auth::user()->theme === 'dark' ? 'hover:bg-gray-800 hover:text-white text-gray-400' : 'hover:bg-indigo-50 hover:text-indigo-600 text-gray-700') }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            System Reports
+        </a>
+    </nav>
+</aside>
+
+<!-- Black Overlay for Mobile Drawer Menu -->
+<div 
+    x-show="sidebarOpen" 
+    x-transition.opacity 
+    @click="sidebarOpen = false" 
+    class="fixed inset-0 z-30 bg-gray-900 bg-opacity-50 backdrop-blur-sm lg:hidden"
+    style="display: none;">
+</div>
