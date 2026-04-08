@@ -42,7 +42,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin / Staff Management
     Route::middleware([\Spatie\Permission\Middleware\RoleMiddleware::class . ':Admin'])->group(function () {
-        Route::resource('users', UserController::class);
+        Route::resource('users', \App\Http\Controllers\UserController::class);
+        Route::resource('roles', \App\Http\Controllers\RoleController::class);
+        Route::resource('permissions', \App\Http\Controllers\PermissionController::class);
     });
 });
 

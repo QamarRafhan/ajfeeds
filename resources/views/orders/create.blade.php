@@ -1,7 +1,5 @@
 <x-app-layout>
     <x-slot name="header">
-        <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Create New Order') }}
         </h2>

@@ -9,13 +9,56 @@
         </p>
     </header>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+    <form id="send-verification" method="POST" action="{{ route('verification.send') }}">
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="POST" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
         @method('patch')
+
+        <div class="flex items-center space-x-6">
+            <div class="shrink-0">
+                @if($user->profile_photo)
+                    <img id="profile-preview" class="h-16 w-16 object-cover rounded-full shadow" src="{{ asset('storage/' . $user->profile_photo) }}" alt="Current profile photo" />
+                @else
+                    <div id="profile-preview-placeholder" class="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-2xl border-2 border-indigo-200">
+                        {{ substr($user->name, 0, 1) }}
+                    </div>
+                    <img id="profile-preview" class="h-16 w-16 object-cover rounded-full shadow hidden" src="" alt="Profile preview" />
+                @endif
+            </div>
+            <label class="block">
+                <span class="sr-only">Choose profile photo</span>
+                <input type="file" name="profile_photo" onchange="previewProfilePhoto(this)" class="block w-full text-sm text-slate-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-indigo-50 file:text-indigo-700
+                  hover:file:bg-indigo-100
+                "/>
+            </label>
+        </div>
+        <script>
+            function previewProfilePhoto(input) {
+                const preview = document.getElementById('profile-preview');
+                const placeholder = document.getElementById('profile-preview-placeholder');
+                
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.classList.remove('hidden');
+                        if (placeholder) {
+                            placeholder.classList.add('hidden');
+                        }
+                    }
+                    
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+        </script>
 
         <div>
             <x-input-label for="name" :value="__('Name')" />

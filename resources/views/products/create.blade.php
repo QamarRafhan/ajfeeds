@@ -40,12 +40,36 @@
                                 
                                 <div class="mb-4">
                                     <x-input-label for="image" :value="__('Product Image')" />
-                                    <input id="image" class="block mt-1 w-full border border-gray-300 rounded p-2" type="file" name="image" />
+                                    <input id="image" class="block mt-1 w-full border border-gray-300 rounded p-2" type="file" name="image" onchange="previewImage(this)" />
                                     <x-input-error :messages="$errors->get('image')" class="mt-2" />
+                                    
+                                    <div id="image-preview" class="mt-4 hidden text-center border p-2 rounded bg-gray-50">
+                                        <p class="text-xs text-gray-500 mb-2">Image Preview</p>
+                                        <img src="" alt="Preview" class="max-h-48 mx-auto rounded shadow-sm">
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Right Column -->
+<script>
+    function previewImage(input) {
+        const preview = document.querySelector('#image-preview');
+        const img = preview.querySelector('img');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                preview.classList.remove('hidden');
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.classList.add('hidden');
+        }
+    }
+</script>
                             <div>
                                 <div class="mb-4">
                                     <x-input-label for="purchase_price" :value="__('Purchase Price')" />
