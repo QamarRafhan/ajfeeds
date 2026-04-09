@@ -3,9 +3,16 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\PurchaseItem;
 use App\Models\Supplier;
+use App\Models\User;
+use App\Models\UserSetting;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -13,10 +20,19 @@ class InventorySeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Clean up old dummy permissions
+        // 1. Reset Data (Careful with order of deletion)
+        OrderItem::query()->delete();
+        Order::query()->delete();
+        PurchaseItem::query()->delete();
+        Purchase::query()->delete();
+        Product::query()->delete();
+        Category::query()->delete();
+        Supplier::query()->delete();
+        
+        // Roles & Permissions are handled by resetting permissions to ensure latest list
         Permission::query()->delete();
 
-        // 2. Create proper System Permissions
+        // 2. Define Permissions
         $permissions = [
             'view dashboard',
             'manage inventory',
@@ -31,100 +47,128 @@ class InventorySeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+            Permission::create(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        // 3. Sync permissions to Admin Role
-        $adminRole = Role::where('name', 'Admin')->first();
-        if ($adminRole) {
-            $adminRole->syncPermissions(Permission::all());
-        }
+        // 3. Create Roles & Assign Permissions
+        $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+        $adminRole->syncPermissions(Permission::all());
 
-        // 4. Seed Categories (AJ-Feeds focus)
-        $categories = [
-            ['name' => 'Poultry Feed', 'description' => 'Specialized feed for chickens, ducks, and turkeys.'],
-            ['name' => 'Cattle Nutrition', 'description' => 'High-protein supplements for dairy and beef cattle.'],
-            ['name' => 'Sheep & Goat Mix', 'description' => 'Balanced nutrients for small ruminants.'],
-            ['name' => 'Agricultural Equipment', 'description' => 'Feeders, drinkers, and storage solutions.'],
-            ['name' => 'Vitamins & Minerals', 'description' => 'Concentrated additives for herd health.'],
+        $managerRole = Role::firstOrCreate(['name' => 'Manager', 'guard_name' => 'web']);
+        $managerRole->syncPermissions(['view dashboard', 'manage inventory', 'manage products', 'manage suppliers', 'view reports']);
+
+        $staffRole = Role::firstOrCreate(['name' => 'Staff', 'guard_name' => 'web']);
+        $staffRole->syncPermissions(['view dashboard', 'manage orders']);
+
+        // 4. Create Users (Total 5)
+        $users = [
+            [
+                'name' => 'Qamar Rafhan',
+                'email' => 'admin@ajfeeds.com',
+                'password' => Hash::make('password'),
+                'role' => 'Admin'
+            ],
+            [
+                'name' => 'Manager User',
+                'email' => 'manager@ajfeeds.com',
+                'password' => Hash::make('password'),
+                'role' => 'Manager'
+            ],
+            [
+                'name' => 'Staff Alice',
+                'email' => 'alice@ajfeeds.com',
+                'password' => Hash::make('password'),
+                'role' => 'Staff'
+            ],
+            [
+                'name' => 'Staff Bob',
+                'email' => 'bob@ajfeeds.com',
+                'password' => Hash::make('password'),
+                'role' => 'Staff'
+            ],
+            [
+                'name' => 'Staff Charlie',
+                'email' => 'charlie@ajfeeds.com',
+                'password' => Hash::make('password'),
+                'role' => 'Staff'
+            ]
         ];
 
-        foreach ($categories as $cat) {
-            Category::firstOrCreate(['name' => $cat['name']], $cat);
+        foreach ($users as $u) {
+            $user = User::create([
+                'name' => $u['name'],
+                'email' => $u['email'],
+                'password' => $u['password'],
+            ]);
+            $user->assignRole($u['role']);
+            
+            // Create default settings
+            UserSetting::create([
+                'user_id' => $user->id,
+                'theme_mode' => 'light_blue',
+                'sidebar_type' => 'full'
+            ]);
         }
 
-        // 5. Seed Suppliers
-        $suppliers = [
-            ['name' => 'Global Grain Corp', 'email' => 'sales@globalgrain.com', 'phone' => '0300-1112223', 'address' => 'Grain District, Karachi'],
-            ['name' => 'Nutra-Mix Feed Additives', 'email' => 'info@nutra-mix.com', 'phone' => '0312-4445556', 'address' => 'Industrial Area, Faisalabad'],
-            ['name' => 'Agri-Tech Solutions', 'email' => 'support@agritech.pk', 'phone' => '0333-7778889', 'address' => 'Model Town, Lahore'],
-            ['name' => 'National Feed Mills', 'email' => 'contact@nationalfeed.com', 'phone' => '0345-9990001', 'address' => 'Sargodha Road, Sheikhupura'],
-        ];
+        // 5. Seed Suppliers (20)
+        $suppliers = Supplier::factory(20)->create();
 
-        foreach ($suppliers as $sup) {
-            Supplier::firstOrCreate(['name' => $sup['name']], $sup);
-        }
+        // 6. Seed Categories (5)
+        $categories = Category::factory(8)->create();
 
-        // 6. Seed Products
-        $poultryCat = Category::where('name', 'Poultry Feed')->first();
-        $cattleCat = Category::where('name', 'Cattle Nutrition')->first();
-        $vitCat = Category::where('name', 'Vitamins & Minerals')->first();
+        // 7. Seed Products (100)
+        $products = Product::factory(100)->recycle($categories)->create();
 
-        $products = [
-            [
-                'name' => 'Layer Starter 2.0',
-                'category_id' => $poultryCat->id,
-                'sku' => 'AJ-PL-001',
-                'description' => 'Premium starter feed for high-yielding layers.',
-                'purchase_price' => 2100.00,
-                'sale_price' => 2450.00,
-                'stock_quantity' => 500,
-                'min_stock_alert' => 50
-            ],
-            [
-                'name' => 'Broiler Finisher XP',
-                'category_id' => $poultryCat->id,
-                'sku' => 'AJ-PL-002',
-                'description' => 'High-energy finisher for rapid growth.',
-                'purchase_price' => 2400.00,
-                'sale_price' => 2800.00,
-                'stock_quantity' => 1200,
-                'min_stock_alert' => 100
-            ],
-            [
-                'name' => 'Dairy Max Pro',
-                'category_id' => $cattleCat->id,
-                'sku' => 'AJ-CT-001',
-                'description' => 'Milk boosting concentrate for dairy cows.',
-                'purchase_price' => 2800.00,
-                'sale_price' => 3200.00,
-                'stock_quantity' => 300,
-                'min_stock_alert' => 30
-            ],
-            [
-                'name' => 'Gold-Vit Multivitamin (1kg)',
-                'category_id' => $vitCat->id,
-                'sku' => 'AJ-VT-001',
-                'description' => 'Broad-spectrum vitamin supplement for all livestock.',
-                'purchase_price' => 650.00,
-                'sale_price' => 850.00,
-                'stock_quantity' => 150,
-                'min_stock_alert' => 20
-            ],
-            [
-                'name' => 'Maize Crushed Blend',
-                'category_id' => $poultryCat->id,
-                'sku' => 'AJ-GR-001',
-                'description' => 'High-quality crushed yellow maize.',
-                'purchase_price' => 1600.00,
-                'sale_price' => 1900.00,
-                'stock_quantity' => 2000,
-                'min_stock_alert' => 200
-            ],
-        ];
+        // 8. Seed Sales Orders (30)
+        $staffUsers = User::role(['Staff', 'Admin', 'Manager'])->get();
+        
+        Order::factory(30)->recycle($staffUsers)->create()->each(function ($order) use ($products) {
+            $itemsCount = rand(1, 4);
+            $randomProducts = $products->random($itemsCount);
+            $totalAmount = 0;
 
-        foreach ($products as $prod) {
-            Product::firstOrCreate(['name' => $prod['name']], $prod);
-        }
+            foreach ($randomProducts as $product) {
+                $qty = rand(1, 10);
+                $price = $product->sale_price;
+                $subtotal = $price * $qty;
+                
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'quantity' => $qty,
+                    'unit_price' => $price,
+                    'subtotal' => $subtotal
+                ]);
+                
+                $totalAmount += $subtotal;
+            }
+
+            $order->update(['total_amount' => $totalAmount]);
+        });
+
+        // 9. Seed Purchases (15)
+        Purchase::factory(15)->recycle($suppliers)->create()->each(function ($purchase) use ($products) {
+            $itemsCount = rand(2, 5);
+            $randomProducts = $products->random($itemsCount);
+            $totalAmount = 0;
+
+            foreach ($randomProducts as $product) {
+                $qty = rand(10, 50);
+                $price = $product->purchase_price;
+                $subtotal = $price * $qty;
+                
+                PurchaseItem::create([
+                    'purchase_id' => $purchase->id,
+                    'product_id' => $product->id,
+                    'quantity' => $qty,
+                    'unit_price' => $price,
+                    'subtotal' => $subtotal
+                ]);
+                
+                $totalAmount += $subtotal;
+            }
+
+            $purchase->update(['total_amount' => $totalAmount]);
+        });
     }
 }
