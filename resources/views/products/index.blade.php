@@ -63,7 +63,7 @@
                                         <td class="whitespace-nowrap px-4 py-2 text-gray-700">
                                             {{ $product->category->name ?? 'N/A' }}</td>
                                         <td class="whitespace-nowrap px-4 py-2 text-gray-700">
-                                            ${{ number_format($product->sale_price, 2) }}</td>
+                                            {{ env('CURRENCY_SIGN') . number_format($product->sale_price, 2) }}</td>
                                         <td class="whitespace-nowrap px-4 py-2">
                                             @if ($product->stock_quantity <= $product->min_stock_alert)
                                                 <span

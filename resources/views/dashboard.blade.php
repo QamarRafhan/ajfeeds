@@ -21,10 +21,12 @@
                 <!-- Total Sales -->
                 <div class="bg-white overflow-hidden shadow-sm flex flex-col p-6 rounded-lg w-full">
                     <p class="text-sm font-medium text-gray-500">Total Sales</p>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">${{ number_format($totalSales, 2) }}</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">
+                        {{ env('CURRENCY_SIGN') . number_format($totalSales, 2) }}</p>
                 </div>
                 <!-- Low Stock Alerts -->
-                <a href="{{ route('products.index') }}" class="bg-red-50 hover:bg-red-100 transition border border-red-200 overflow-hidden shadow-sm flex flex-col p-6 rounded-lg w-full block">
+                <a href="{{ route('products.index') }}"
+                    class="bg-red-50 hover:bg-red-100 transition border border-red-200 overflow-hidden shadow-sm flex flex-col p-6 rounded-lg w-full block">
                     <p class="text-sm font-medium text-red-600">Low Stock Alerts</p>
                     <p class="text-3xl font-bold text-red-700 mt-2">{{ number_format($lowStockAlerts) }}</p>
                 </a>
@@ -34,8 +36,13 @@
                 <div class="md:col-span-2 bg-white shadow-sm p-6 rounded-lg overflow-hidden relative">
                     <div class="flex justify-between items-center border-b pb-2">
                         <h3 class="text-lg font-semibold text-gray-800">Sales Chart (Last 7 Days)</h3>
-                        <a href="{{ route('reports.sales') }}" target="_blank" class="inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded transition">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <a href="{{ route('reports.sales') }}" target="_blank"
+                            class="inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded transition">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
                             Download Report
                         </a>
                     </div>
@@ -56,9 +63,13 @@
                     <ul class="mt-4 space-y-3">
                         @forelse ($lowStockProducts as $product)
                             <li>
-                                <a href="{{ route('products.edit', $product) }}" class="flex justify-between items-center bg-red-50 hover:bg-red-100 transition p-2 rounded group">
-                                    <span class="text-sm font-medium text-red-700 group-hover:underline">{{ $product->name }}</span>
-                                    <span class="text-xs bg-red-200 text-red-800 px-2 py-1 rounded-full">{{ $product->stock_quantity }} left</span>
+                                <a href="{{ route('products.edit', $product) }}"
+                                    class="flex justify-between items-center bg-red-50 hover:bg-red-100 transition p-2 rounded group">
+                                    <span
+                                        class="text-sm font-medium text-red-700 group-hover:underline">{{ $product->name }}</span>
+                                    <span
+                                        class="text-xs bg-red-200 text-red-800 px-2 py-1 rounded-full">{{ $product->stock_quantity }}
+                                        left</span>
                                 </a>
                             </li>
                         @empty
@@ -90,7 +101,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
                 }
             });
 
@@ -113,7 +128,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
                 }
             });
         });

@@ -50,7 +50,7 @@
                                             </span>
                                         </td>
                                         <td class="whitespace-nowrap px-4 py-2 text-gray-700">
-                                            ${{ number_format($order->total_amount, 2) }}</td>
+                                            {{ env('CURRENCY_SIGN') . number_format($order->total_amount, 2) }}</td>
                                         <td class="whitespace-nowrap px-4 py-2 text-gray-700">
                                             {{ $order->created_at->format('M d, Y') }}</td>
                                         <td class="whitespace-nowrap px-4 py-2 text-right">
