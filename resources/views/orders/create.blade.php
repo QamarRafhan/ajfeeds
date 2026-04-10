@@ -23,16 +23,15 @@
                                 <div>
                                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Customer
                                         Selection</label>
-                                    <select name="customer_id" x-select2.tags class="w-full no-select2" required>
-                                        <option value="">Select or Type New Customer Name...</option>
+                                    <select name="customer_id" x-select2.tags class="w-full select2" required>
+                                        <option value="">Select Customer Name...</option>
                                         @foreach ($customers as $customer)
                                             <option value="{{ $customer->id }}">{{ $customer->name }}
                                                 ({{ $customer->phone ?? 'No Phone' }})
                                             </option>
                                         @endforeach
                                     </select>
-                                    <p class="mt-1 text-[10px] text-gray-400 italic font-medium">Type a name and press
-                                        Enter to auto-register a new client.</p>
+                                    {{-- <p class="mt-1 text-[10px] text-gray-400 italic font-medium">Type a name and press Enter to auto-register a new client.</p> --}}
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-2">
@@ -78,7 +77,7 @@
                                             class="bg-gray-50 rounded-lg group hover:bg-white hover:shadow-md transition-all duration-200">
                                             <td class="p-2">
                                                 <select x-select2 x-model="item.product_id"
-                                                    :name="'items[' + index + '][product_id]'" class="w-full no-select2"
+                                                    :name="'items[' + index + '][product_id]'" class="w-full select2"
                                                     required>
                                                     <option value="">Search Poultry/Cattle Feed...</option>
                                                     @foreach ($products as $product)
