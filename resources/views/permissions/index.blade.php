@@ -20,24 +20,24 @@
 
                     <div class="overflow-x-auto">
                         <table class="datatable min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-50 uppercase tracking-widest text-[11px] font-black text-gray-500">
                                 <tr>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Internal Name</th>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Security Guard</th>
-                                    <th class="px-4 py-3 text-center">System Actions</th>
+                                    <th class="whitespace-nowrap px-6 py-4 font-bold text-left">Internal Name</th>
+                                    <th class="whitespace-nowrap px-6 py-4 font-bold text-left">Security Guard</th>
+                                    <th class="px-6 py-4 text-right">System Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 @foreach ($permissions as $permission)
                                     <tr class="hover:bg-gray-50 transition">
-                                        <td class="whitespace-nowrap px-4 py-3 font-bold text-indigo-600">
+                                        <td class="whitespace-nowrap px-6 py-4 font-bold text-indigo-600">
                                             {{ $permission->name }}
                                         </td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-gray-500 font-mono text-xs">
+                                        <td class="whitespace-nowrap px-6 py-4 text-gray-500 font-mono text-xs">
                                             {{ $permission->guard_name }}
                                         </td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-center">
-                                            <div class="flex justify-center items-center space-x-3">
+                                        <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                                            <div class="flex justify-end items-center space-x-3">
                                                 <a href="{{ route('permissions.edit', $permission) }}"
                                                     class="p-2 bg-gray-50 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition shadow-sm border border-indigo-100">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor"

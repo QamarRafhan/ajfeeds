@@ -17,6 +17,30 @@
                         </a>
                     </div>
 
+                    <!-- Filter Bar -->
+                    <div class="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100 items-end">
+                        <form method="GET" action="{{ route('users.index') }}"
+                            class="flex flex-wrap gap-4 w-full md:w-auto items-end">
+                            <div class="w-full md:w-48">
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Role Filter</label>
+                                <select name="role" onchange="this.form.submit()"
+                                    class="bg-white border-gray-200 text-sm">
+                                    <option value="">All Staff Roles</option>
+                                    @foreach ($roles as $role)
+                                        <option value="{{ $role->name }}"
+                                            {{ request('role') == $role->name ? 'selected' : '' }}>
+                                            {{ $role->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <button type="submit"
+                                class="bg-gray-800 text-white px-4 py-2 rounded text-sm font-bold hover:bg-black transition">Apply</button>
+                            <a href="{{ route('users.index') }}"
+                                class="text-sm text-gray-500 hover:text-gray-700 underline px-2 py-2">Reset</a>
+                        </form>
+                    </div>
+
                     <div class="overflow-x-auto">
                         <table class="datatable min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
                             <thead class="bg-gray-50">

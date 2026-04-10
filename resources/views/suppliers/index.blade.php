@@ -19,29 +19,29 @@
 
                     <div class="overflow-x-auto">
                         <table class="datatable min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-50 uppercase tracking-widest text-[11px] font-black text-gray-500">
                                 <tr>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Supplier Name</th>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Email Address</th>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Phone Number</th>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Location / Address</th>
-                                    <th class="px-4 py-3 text-center">Actions</th>
+                                    <th class="whitespace-nowrap px-6 py-4 font-bold text-left">Supplier Name</th>
+                                    <th class="whitespace-nowrap px-6 py-4 font-bold text-left">Email Address</th>
+                                    <th class="whitespace-nowrap px-6 py-4 font-bold text-left">Phone Number</th>
+                                    <th class="whitespace-nowrap px-6 py-4 font-bold text-left">Location / Address</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
 
                             <tbody class="divide-y divide-gray-200">
                                 @foreach ($suppliers as $supplier)
                                     <tr class="hover:bg-gray-50 transition">
-                                        <td class="whitespace-nowrap px-4 py-3 font-bold text-primary-600">
+                                        <td class="whitespace-nowrap px-6 py-4 font-bold text-primary-600">
                                             {{ $supplier->name }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-gray-700">
+                                        <td class="whitespace-nowrap px-6 py-4 text-gray-700">
                                             {{ $supplier->email ?? '-' }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-gray-700 font-mono text-xs">
+                                        <td class="whitespace-nowrap px-6 py-4 text-gray-700 font-mono text-xs">
                                             {{ $supplier->phone ?? '-' }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-gray-500">
+                                        <td class="whitespace-nowrap px-6 py-4 text-gray-500">
                                             {{ Str::limit($supplier->address, 50) }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-center">
-                                            <div class="flex justify-center space-x-2">
+                                        <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                                            <div class="flex justify-end space-x-2">
                                                 <a href="{{ route('suppliers.edit', $supplier) }}"
                                                     class="p-2 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-600 hover:text-white transition">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor"

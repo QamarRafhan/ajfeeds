@@ -9,10 +9,17 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('roles')->get();
-        return view('users.index', compact('users'));
+        $query = User::with('roles');
+
+        if ($request->filled('role')) {
+            $query->role($request->role);
+        }
+
+        $users = $query->latest()->get();
+        $roles = Role::all();
+        return view('users.index', compact('users', 'roles'));
     }
 
     public function create()

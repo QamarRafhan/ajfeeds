@@ -44,46 +44,63 @@
 
                     <div class="overflow-x-auto">
                         <table class="datatable min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-50 text-[11px] uppercase tracking-widest font-black text-gray-500">
                                 <tr>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Ref No</th>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Cashier</th>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Status</th>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Total Amount</th>
-                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Order Date</th>
-                                    <th class="px-4 py-3 text-center">Actions</th>
+                                    <th class="px-6 py-4">Reference</th>
+                                    <th class="px-6 py-4">Customer</th>
+                                    <th class="px-6 py-4">Date</th>
+                                    <th class="px-6 py-4">Fulfillment</th>
+                                    <th class="px-6 py-4">Payment</th>
+                                    <th class="px-6 py-4 text-right">Total</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
-
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody class="divide-y divide-gray-100">
                                 @foreach ($orders as $order)
                                     <tr class="hover:bg-gray-50 transition">
-                                        <td class="whitespace-nowrap px-4 py-3 font-bold text-primary-600">
-                                            {{ $order->reference_no }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-gray-700">
-                                            {{ $order->user->name ?? 'System' }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3">
+                                        <td class="px-6 py-4 whitespace-nowrap">
                                             <span
-                                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider
-                                                {{ $order->status === 'completed' ? 'bg-green-100 text-green-700' : ($order->status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">
+                                                class="font-mono text-xs font-bold text-indigo-600">{{ $order->reference_no }}</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-bold text-gray-900">
+                                                {{ $order->customer->name ?? 'Guest/Unknown' }}</div>
+                                            <div class="text-[10px] text-gray-400 font-medium">
+                                                {{ $order->customer->phone ?? '' }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
+                                            {{ $order->created_at->format('M d, Y') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black capitalize
+                                                {{ $order->status === 'completed' ? 'bg-green-100 text-green-700' : ($order->status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700') }}">
                                                 {{ $order->status }}
                                             </span>
                                         </td>
-                                        <td class="whitespace-nowrap px-4 py-3 font-semibold">
-                                            {{ env('CURRENCY_SIGN') . number_format($order->total_amount, 2) }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-gray-500">
-                                            {{ $order->created_at->format('M d, Y') }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-center">
-                                            <div class="flex justify-center items-center space-x-2">
-                                                <a href="{{ route('orders.show', $order) }}"
-                                                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-bold border border-gray-300">
-                                                    View
-                                                </a>
-                                                <a href="{{ route('orders.edit', $order) }}"
-                                                    class="inline-flex items-center px-3 py-1 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 text-xs font-bold border border-indigo-200">
-                                                    Status
-                                                </a>
-                                            </div>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter
+                                                {{ $order->payment_status === 'paid' ? 'bg-blue-100 text-blue-700' : ($order->payment_status === 'partial' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600') }}">
+                                                {{ $order->payment_status }}
+                                            </span>
+                                            @if ($order->payment_status !== 'paid')
+                                                <div class="text-[9px] text-red-400 font-bold mt-1">
+                                                    Due:
+                                                    {{ env('CURRENCY_SIGN') }}{{ number_format($order->total_amount - $order->paid_amount, 2) }}
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-black text-gray-900">
+                                            {{ env('CURRENCY_SIGN') . number_format($order->total_amount, 2) }}
+                                        </td>
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                            <a href="{{ route('orders.show', $order) }}"
+                                                class="text-indigo-600 hover:text-indigo-900 font-bold">Details</a>
+                                            <a href="{{ route('orders.edit', $order) }}"
+                                                class="text-gray-400 hover:text-gray-600">Update</a>
                                         </td>
                                     </tr>
                                 @endforeach

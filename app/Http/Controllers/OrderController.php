@@ -9,12 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\Customer;
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with('user');
+        $query = Order::with('user', 'customer');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -24,30 +25,50 @@ class OrderController extends Controller
             $query->where('reference_no', 'like', '%' . $request->search . '%');
         }
 
-        $orders = $query->latest()->get(); // Use get() because Datatables will handle paging
+        $orders = $query->latest()->get(); 
         return view('orders.index', compact('orders'));
     }
 
     public function create()
     {
         $products = Product::where('stock_quantity', '>', 0)->get();
-        return view('orders.create', compact('products'));
+        $customers = Customer::all();
+        $product_prices = $products->pluck('sale_price', 'id');
+        return view('orders.create', compact('products', 'customers', 'product_prices'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'customer_id' => 'required',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'paid_amount' => 'nullable|numeric|min:0',
         ]);
 
         DB::transaction(function () use ($request) {
+            $paid_amount = $request->paid_amount ?? 0;
+            
+            // // Handle Quick Add Customer with extreme care
+            // $customer_input = $request->customer_id;
+            // $customer_id = $customer_input;
+            
+            // // If the input is not numeric, or it is numeric but no such ID exists in our database,
+            // // treat it as a new customer name string and create the record.
+            // if (!is_numeric($customer_input) || !Customer::where('id', $customer_input)->exists()) {
+            //     $customer = Customer::create(['name' => $customer_input]);
+            //     $customer_id = $customer->id;
+            // }
+
             $order = Order::create([
                 'user_id' => auth()->id() ?? 1,
+                'customer_id' => $request->customer_id,
                 'reference_no' => 'ORD-' . strtoupper(Str::random(6)),
                 'status' => $request->status ?? 'pending',
                 'total_amount' => 0,
+                'paid_amount' => $paid_amount,
+                'payment_status' => 'unpaid',
             ]);
 
             $total = 0;
@@ -84,7 +105,33 @@ class OrderController extends Controller
                 ]);
             }
 
-            $order->update(['total_amount' => $total]);
+            // Determine payment status
+            if ($paid_amount >= $total) {
+                $order->payment_status = 'paid';
+                
+                if ($paid_amount > $total) {
+                    // Always use the resolved $customer_id to ensure credits are saved to new customers too
+                    $customerRecord = Customer::find($request->customer_id);
+                    if ($customerRecord) {
+                        $customerRecord->increment('credit_balance', ($paid_amount - $total));
+                    }
+                }
+            } elseif ($paid_amount > 0) {
+                $order->payment_status = 'partial';
+            } else {
+                $order->payment_status = 'unpaid';
+            }
+
+            $order->total_amount = $total;
+            $order->save();
+
+            if ($paid_amount > 0) {
+                $order->payments()->create([
+                    'type' => 'incoming',
+                    'amount' => $paid_amount,
+                    'method' => 'Cash',
+                ]);
+            }
         });
 
         return redirect()->route('orders.index')->with('success', 'Order created successfully.');
@@ -92,7 +139,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load('items.product', 'user');
+        $order->load(['items.product', 'user', 'customer', 'payments']);
         return view('orders.show', compact('order'));
     }
 
@@ -109,6 +156,34 @@ class OrderController extends Controller
 
         $order->update(['status' => $request->status]);
 
-        return redirect()->route('orders.index')->with('success', 'Order status updated to ' . $request->status);
+        return redirect()->route('orders.index')->with('success', 'Order status updated successfully.');
+    }
+
+    public function collectPayment(Request $request, Order $order)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'method' => 'required|in:Cash,Bank,Online',
+        ]);
+
+        DB::transaction(function () use ($request, $order) {
+            $amount = $request->amount;
+            $order->increment('paid_amount', $amount);
+            
+            $order->refresh();
+            if ($order->paid_amount >= $order->total_amount) {
+                $order->update(['payment_status' => 'paid']);
+            } else {
+                $order->update(['payment_status' => 'partial']);
+            }
+
+            $order->payments()->create([
+                'type' => 'incoming',
+                'amount' => $amount,
+                'method' => $request->method,
+            ]);
+        });
+
+        return redirect()->back()->with('success', 'Manual payment recorded successfully.');
     }
 }

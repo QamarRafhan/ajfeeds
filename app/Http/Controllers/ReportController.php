@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use App\Models\Customer;
 
 class ReportController extends Controller
 {
@@ -26,7 +27,7 @@ class ReportController extends Controller
 
     public function orderInvoicePdf(Order $order)
     {
-        $order->load('items.product', 'user');
+        $order->load(['items.product', 'user', 'customer', 'payments']);
 
         $pdf = Pdf::loadView('reports.invoice', compact('order'));
         return $pdf->download('invoice-' . $order->reference_no . '.pdf');
@@ -37,7 +38,7 @@ class ReportController extends Controller
         $from = $request->input('from', now()->startOfMonth()->format('Y-m-d'));
         $to = $request->input('to', now()->format('Y-m-d'));
 
-        $orders = Order::with(['user', 'items.product'])
+        $orders = Order::with(['user', 'items.product', 'customer'])
             ->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
             ->where('status', 'completed')
             ->get();
@@ -54,7 +55,7 @@ class ReportController extends Controller
     public function userReport(\App\Models\User $user)
     {
         $user->load(['roles']);
-        $orders = Order::where('user_id', $user->id)->latest()->get();
+        $orders = Order::where('user_id', $user->id)->with('customer')->latest()->get();
         $stats = [
             'total_orders' => $orders->count(),
             'completed_orders' => $orders->where('status', 'completed')->count(),
@@ -64,5 +65,11 @@ class ReportController extends Controller
         ];
 
         return view('reports.user', compact('user', 'orders', 'stats'));
+    }
+
+    public function clientLedger()
+    {
+        $customers = Customer::with('orders')->latest()->get();
+        return view('reports.ledger', compact('customers'));
     }
 }

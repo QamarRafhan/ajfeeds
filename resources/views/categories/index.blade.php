@@ -18,60 +18,53 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-                            <thead class="ltr:text-left rtl:text-right bg-gray-50">
+                        <table class="datatable min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
+                            <thead
+                                class="ltr:text-left rtl:text-right bg-gray-50 uppercase tracking-widest text-[11px] font-black text-gray-500">
                                 <tr>
-                                    <th
-                                        class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 text-left cursor-default">
+                                    <th class="whitespace-nowrap px-6 py-4 font-medium text-left cursor-default">
                                         Name</th>
-                                    <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 text-left">
+                                    <th class="whitespace-nowrap px-6 py-4 font-medium text-left">
                                         Description</th>
-                                    <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 text-left">Products
+                                    <th class="whitespace-nowrap px-6 py-4 font-medium text-left">Products
                                         Count</th>
-                                    <th class="px-4 py-2"></th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
 
                             <tbody class="divide-y divide-gray-200">
                                 @forelse($categories as $category)
-                                    <tr>
-                                        <td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="whitespace-nowrap px-6 py-4 font-bold text-gray-900">
                                             {{ $category->name }}</td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-gray-700">
+                                        <td class="whitespace-nowrap px-6 py-4 text-gray-700">
                                             {{ Str::limit($category->description, 50) }}</td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-gray-700">
+                                        <td class="whitespace-nowrap px-6 py-4 text-gray-700">
                                             <span
-                                                class="inline-flex items-center justify-center rounded-full bg-blue-100 px-2.5 py-0.5 text-blue-700">
+                                                class="inline-flex items-center justify-center rounded-full bg-blue-100 px-2.5 py-0.5 text-blue-700 text-[10px] font-black uppercase">
                                                 {{ $category->products_count }}
                                             </span>
                                         </td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-right">
+                                        <td class="whitespace-nowrap px-6 py-4 text-right">
                                             <div class="flex justify-end gap-2">
                                                 <a href="{{ route('categories.edit', $category) }}"
-                                                    class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700">Edit</a>
+                                                    class="inline-block rounded bg-indigo-50 px-4 py-2 text-[10px] font-black uppercase text-indigo-600 hover:bg-indigo-600 hover:text-white transition">Edit</a>
                                                 <form action="{{ route('categories.destroy', $category) }}"
                                                     method="POST" class="sweet-alert-delete"
                                                     data-message="Are you sure you want to delete this category?">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit"
-                                                        class="inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700">Delete</button>
+                                                        class="inline-block rounded bg-red-50 px-4 py-2 text-[10px] font-black uppercase text-red-600 hover:bg-red-600 hover:text-white transition">Delete</button>
                                                 </form>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">No categories
-                                            found.</td>
-                                    </tr>
+                                    <!-- Handled by Datatables -->
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
-
-                    <div class="mt-6">
-                        {{ $categories->links() }}
                     </div>
                 </div>
             </div>

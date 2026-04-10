@@ -13,6 +13,10 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\CustomerController;
 
 require __DIR__ . '/auth.php';
 
@@ -48,6 +52,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('suppliers', SupplierController::class);
     Route::resource('purchases', PurchaseController::class);
     Route::resource('orders', OrderController::class);
+    Route::resource('customers', CustomerController::class);
+
+    // Payment Management
+    Route::post('/orders/{order}/payments', [OrderController::class, 'collectPayment'])->name('orders.payments.collect');
     Route::resource('deliveries', DeliveryController::class);
     Route::resource('payments', PaymentController::class);
 
@@ -56,12 +64,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/{order}/invoice/pdf', [ReportController::class, 'orderInvoicePdf'])->name('orders.invoice.pdf');
     Route::get('/reports/sales', [ReportController::class, 'salesReport'])->name('reports.sales');
     Route::get('/reports/user/{user}', [ReportController::class, 'userReport'])->name('reports.user');
+    Route::get('/reports/ledger', [ReportController::class, 'clientLedger'])->name('reports.ledger');
 
     // Admin / Staff Management
-    Route::middleware([\Spatie\Permission\Middleware\RoleMiddleware::class . ':Admin'])->group(function () {
-        Route::resource('users', \App\Http\Controllers\UserController::class);
-        Route::resource('roles', \App\Http\Controllers\RoleController::class);
-        Route::resource('permissions', \App\Http\Controllers\PermissionController::class);
+    Route::middleware([RoleMiddleware::class . ':Admin'])->group(function () {
+        Route::resource('users', UserController::class);
+        Route::resource('roles', RoleController::class);
+        Route::resource('permissions', PermissionController::class);
     });
 });
 

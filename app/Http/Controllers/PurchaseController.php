@@ -12,10 +12,17 @@ use Illuminate\Support\Str;
 
 class PurchaseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $purchases = Purchase::with('supplier')->latest()->get();
-        return view('purchases.index', compact('purchases'));
+        $query = Purchase::with('supplier');
+
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->supplier_id);
+        }
+
+        $purchases = $query->latest()->get(); 
+        $suppliers = Supplier::all();
+        return view('purchases.index', compact('purchases', 'suppliers'));
     }
 
     public function create()

@@ -244,6 +244,7 @@
             color: var(--text-main) !important;
             border-radius: 0.375rem !important;
             padding: 0.5rem 0.75rem !important;
+            padding-left: 3rem !important; /* Fixed padding for Currency symbols like Rs. */
             width: 100% !important;
             display: block !important;
         }
@@ -663,10 +664,10 @@
                         el.dispatchEvent(new Event('input'));
                     });
 
-                    Alpine.effect(() => {
-                        const value = evaluate(expression);
-                        $(el).val(value).trigger('change.select2');
-                    });
+                        Alpine.effect(() => {
+                            const value = evaluate(expression);
+                            $(el).val(value).trigger('change.select2');
+                        });
                 });
             });
 
