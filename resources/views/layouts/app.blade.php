@@ -515,7 +515,7 @@
                 <div class="flex items-center space-x-4">
 
                     <!-- Theme Selector Dropdown -->
-                    <x-dropdown align="right" width="64">
+                    {{-- <x-dropdown align="right" width="64">
                         <x-slot name="trigger">
                             <button
                                 class="p-2 bg-gray-100 rounded-full hover:bg-gray-200 hover:text-indigo-600 transition"
@@ -563,7 +563,7 @@
                                 </div>
                             </div>
                         </x-slot>
-                    </x-dropdown>
+                    </x-dropdown> --}}
 
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
