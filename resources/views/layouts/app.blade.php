@@ -528,7 +528,7 @@
                                 </svg>
                             </button>
                         </x-slot>
-                        {{-- <x-slot name="content">
+                        <x-slot name="content">
                             <div class="w-40"> <!-- increase width here -->
                                 <div class="px-4 py-2 text-xs font-bold text-gray-400 uppercase border-b">
                                     Premium Design Systems
@@ -562,7 +562,7 @@
                                     </form>
                                 </div>
                             </div>
-                        </x-slot> --}}
+                        </x-slot>
                     </x-dropdown>
 
                     <x-dropdown align="right" width="48">
