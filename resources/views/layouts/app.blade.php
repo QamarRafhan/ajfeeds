@@ -657,22 +657,24 @@
 
             // Alpine.js Directives
             document.addEventListener('alpine:init', () => {
-                Alpine.directive('select2', (el, {
-                    expression
-                }, {
-                    evaluate
-                }) => {
-                    $(el).select2({
-                        width: '100%'
-                    });
-                    $(el).on('change', () => {
-                        el.dispatchEvent(new Event('input'));
+                Alpine.directive('select2', (el, { expression }, { evaluate }) => {
+                    $(el).select2({ width: '100%' });
+
+                    // Dispatch a BUBBLING input event so Alpine's x-model can detect the change
+                    $(el).on('change', function () {
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
                     });
 
+                    // Only sync back to select2 display when an expression is provided
+                    if (expression) {
                         Alpine.effect(() => {
                             const value = evaluate(expression);
-                            $(el).val(value).trigger('change.select2');
+                            if (value !== undefined) {
+                                $(el).val(value).trigger('change.select2');
+                            }
                         });
+                    }
                 });
             });
 

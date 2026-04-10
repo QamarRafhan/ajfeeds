@@ -174,18 +174,43 @@
                     if (paidInput) {
                         paidInput.addEventListener('input', (e) => {
                             this.paidAmount = parseFloat(e.target.value) || 0;
+                            this.updateTotals();
                         });
                     }
 
                     // Force initial calculation
                     this.updateTotals();
 
-                    // Watch for ANY items changes
+                    // Watch for quantity changes (product_id changes are handled by setProduct)
                     this.$watch('items', () => {
                         this.updateTotals();
-                    }, {
-                        deep: true
+                    }, { deep: true });
+
+                    // Hook Select2 changes on product selects after DOM settles
+                    this.$nextTick(() => {
+                        this._bindSelect2Events();
                     });
+                },
+
+                // Bind Select2 change events to update Alpine state directly
+                _bindSelect2Events() {
+                    const self = this;
+                    $(document).on('change', 'select[name*="[product_id]"]', function () {
+                        const name = $(this).attr('name');
+                        const match = name.match(/items\[(\d+)\]\[product_id\]/);
+                        if (match) {
+                            const idx = parseInt(match[1]);
+                            if (self.items[idx] !== undefined) {
+                                self.items[idx].product_id = $(this).val();
+                                self.updateTotals();
+                            }
+                        }
+                    });
+                },
+
+                setProduct(index, value) {
+                    this.items[index].product_id = value;
+                    this.updateTotals();
                 },
 
                 updateTotals() {
@@ -193,8 +218,9 @@
                 },
 
                 calculateSubtotal(item) {
-                    const price = this.productPrices[item.product_id] || 0;
-                    return (parseFloat(price) * (parseInt(item.quantity) || 0));
+                    const price = parseFloat(this.productPrices[item.product_id]) || 0;
+                    const qty = parseInt(item.quantity) || 0;
+                    return price * qty;
                 },
 
                 calculateGrandTotal() {
@@ -209,14 +235,17 @@
                 },
 
                 addItem() {
-                    this.items.push({
-                        product_id: '',
-                        quantity: 1
+                    this.items.push({ product_id: '', quantity: 1 });
+                    this.$nextTick(() => {
+                        // Re-initialize Select2 on newly added rows
+                        $('select[name*="[product_id]"]').not('.select2-hidden-accessible').select2({ width: '100%' });
                     });
                 },
+
                 removeItem(index) {
                     if (this.items.length > 1) {
                         this.items.splice(index, 1);
+                        this.updateTotals();
                     }
                 }
             }))
