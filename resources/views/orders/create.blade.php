@@ -6,71 +6,95 @@
     </x-slot>
 
     <div class="py-12" x-data="orderForm()">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
-            <!-- Errors -->
-            
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg border border-gray-200">
+                <div class="p-8 text-gray-900">
                     <form method="POST" action="{{ route('orders.store') }}">
                         @csrf
 
-                        <!-- Products Section -->
-                        <div class="mb-4 border-b pb-4">
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">Order Items</h3>
-                            <p class="text-sm text-gray-500 mb-4">Stock deductions are handled automatically once the order is placed.</p>
-                            
-                            <table class="w-full text-left mb-4">
+                        <!-- Header Logic -->
+                        <div class="flex justify-between items-start mb-8 border-b pb-6">
+                            <div>
+                                <h3 class="text-2xl font-black text-gray-800 tracking-tight">Generate New Sale</h3>
+                                <p class="text-sm text-gray-500">Add products and set initial status for this
+                                    transaction.</p>
+                            </div>
+                            <div class="w-48">
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Initial
+                                    Status</label>
+                                <select name="status" class="bg-gray-50 border-gray-200 text-sm font-semibold">
+                                    <option value="pending">Pending</option>
+                                    <option value="completed" selected>Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Products Table -->
+                        <div class="mb-6">
+                            <table class="w-full text-sm text-left border-separate border-spacing-y-2">
                                 <thead>
-                                    <tr class="bg-gray-50 text-sm text-gray-600">
-                                        <th class="p-2">Product (Available Stock)</th>
-                                        <th class="p-2 w-32">Quantity</th>
-                                        <th class="p-2 w-24 text-center">Remove</th>
+                                    <tr class="text-gray-400 uppercase text-[10px] font-black tracking-widest">
+                                        <th class="px-4 py-2">Product selection</th>
+                                        <th class="px-4 py-2 w-32">Qty</th>
+                                        <th class="px-4 py-2 w-24 text-center">Delete</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <template x-for="(item, index) in items" :key="index">
-                                        <tr class="border-b">
+                                        <tr
+                                            class="bg-gray-50 rounded-lg group hover:bg-white hover:shadow-md transition-all duration-200">
                                             <td class="p-2">
-                                                <select x-model="item.product_id" :name="'items['+index+'][product_id]'" 
-                                                    x-init="$nextTick(() => { 
-                                                        if(!$el.tomselect) {
-                                                            new TomSelect($el, {
-                                                                create: false,
-                                                                sortField: { field: 'text', direction: 'asc' }
-                                                            });
-                                                        }
-                                                    })"
-                                                    class="w-full text-sm" required>
-                                                    <option value="">Select a product...</option>
-                                                    @foreach($products as $product)
-                                                        <option value="{{ $product->id }}">{{ $product->name }} [Stock: {{ $product->stock_quantity }}] - ${{ number_format($product->sale_price, 2) }}</option>
+                                                <select x-select2 x-model="item.product_id"
+                                                    :name="'items[' + index + '][product_id]'" class="w-full no-select2"
+                                                    required>
+                                                    <option value="">Search Poultry/Cattle Feed...</option>
+                                                    @foreach ($products as $product)
+                                                        <option value="{{ $product->id }}">
+                                                            {{ $product->name }} ({{ $product->sku }}) -
+                                                            {{ env('CURRENCY_SIGN') }}{{ number_format($product->sale_price, 2) }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </td>
                                             <td class="p-2">
-                                                <input type="number" x-model="item.quantity" :name="'items['+index+'][quantity]'" min="1" class="w-full border-gray-300 rounded focus:ring-indigo-500 text-sm" required>
+                                                <input type="number" x-model="item.quantity"
+                                                    :name="'items[' + index + '][quantity]'" min="1"
+                                                    class="border-gray-200 focus:ring-primary focus:border-primary font-bold"
+                                                    required>
                                             </td>
                                             <td class="p-2 text-center">
-                                                <button type="button" @click="removeItem(index)" class="text-red-500 hover:text-red-700 text-sm font-bold p-2 bg-red-50 rounded hover:bg-red-100">X</button>
+                                                <button type="button" @click="removeItem(index)"
+                                                    class="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-700 hover:bg-red-50 rounded-full transition">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
                                             </td>
                                         </tr>
                                     </template>
                                 </tbody>
                             </table>
-                            
-                            <button type="button" @click="addItem" class="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-sm font-semibold py-1.5 px-3 rounded inline-flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+
+                            <button type="button" @click="addItem"
+                                class="mt-4 inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 text-xs font-black uppercase tracking-widest hover:bg-indigo-100 rounded-md border border-indigo-200 transition">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
-                                Add Item Row
+                                Add Row
                             </button>
                         </div>
 
-                        <div class="flex items-center justify-end mt-4">
-                            <a href="{{ route('orders.index') }}" class="text-sm text-gray-600 hover:text-gray-900 mr-4 font-medium">Cancel</a>
-                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow transition ease-in-out duration-150">
-                                Place Order
+                        <div class="flex items-center justify-end mt-12 pt-6 border-t space-x-4">
+                            <a href="{{ route('orders.index') }}"
+                                class="text-sm font-bold text-gray-400 hover:text-gray-600">Cancel Transaction</a>
+                            <button type="submit"
+                                class="bg-gray-900 border border-transparent rounded-md font-black text-xs text-white uppercase tracking-widest hover:bg-black active:bg-gray-900 focus:outline-none focus:border-gray-900 px-8 py-3 transition">
+                                Process Order
                             </button>
                         </div>
                     </form>
@@ -81,18 +105,16 @@
 
     <script>
         document.addEventListener('alpine:init', () => {
-            let oldItems = @json(old('items', []));
-            if (oldItems.length === 0) {
-                oldItems = [{ product_id: '', quantity: 1 }];
-            }
-
             Alpine.data('orderForm', () => ({
-                items: oldItems,
+                items: @json(old('items', [['product_id' => '', 'quantity' => 1]])),
                 addItem() {
-                    this.items.push({ product_id: '', quantity: 1 });
+                    this.items.push({
+                        product_id: '',
+                        quantity: 1
+                    });
                 },
                 removeItem(index) {
-                    if(this.items.length > 1) {
+                    if (this.items.length > 1) {
                         this.items.splice(index, 1);
                     }
                 }

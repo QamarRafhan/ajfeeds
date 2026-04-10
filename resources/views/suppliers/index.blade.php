@@ -18,60 +18,59 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-                            <thead class="ltr:text-left rtl:text-right bg-gray-50">
+                        <table class="datatable min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th
-                                        class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 text-left cursor-default">
-                                        Name</th>
-                                    <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 text-left">Email
-                                    </th>
-                                    <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 text-left">Phone
-                                    </th>
-                                    <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900 text-left">Address
-                                    </th>
-                                    <th class="px-4 py-2"></th>
+                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Supplier Name</th>
+                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Email Address</th>
+                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Phone Number</th>
+                                    <th class="whitespace-nowrap px-4 py-3 font-bold text-left">Location / Address</th>
+                                    <th class="px-4 py-3 text-center">Actions</th>
                                 </tr>
                             </thead>
 
                             <tbody class="divide-y divide-gray-200">
-                                @forelse($suppliers as $supplier)
-                                    <tr>
-                                        <td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                                @foreach ($suppliers as $supplier)
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="whitespace-nowrap px-4 py-3 font-bold text-primary-600">
                                             {{ $supplier->name }}</td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-gray-700">
+                                        <td class="whitespace-nowrap px-4 py-3 text-gray-700">
                                             {{ $supplier->email ?? '-' }}</td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-gray-700">
+                                        <td class="whitespace-nowrap px-4 py-3 text-gray-700 font-mono text-xs">
                                             {{ $supplier->phone ?? '-' }}</td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-gray-700">
-                                            {{ Str::limit($supplier->address, 30) }}</td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-right">
-                                            <div class="flex justify-end gap-2">
+                                        <td class="whitespace-nowrap px-4 py-3 text-gray-500">
+                                            {{ Str::limit($supplier->address, 50) }}</td>
+                                        <td class="whitespace-nowrap px-4 py-3 text-center">
+                                            <div class="flex justify-center space-x-2">
                                                 <a href="{{ route('suppliers.edit', $supplier) }}"
-                                                    class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700">Edit</a>
+                                                    class="p-2 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-600 hover:text-white transition">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                </a>
                                                 <form action="{{ route('suppliers.destroy', $supplier) }}"
                                                     method="POST" class="sweet-alert-delete"
                                                     data-message="Delete this supplier permanently?">
-                                                    @csrf
-                                                    @method('DELETE')
+                                                    @csrf @method('DELETE')
                                                     <button type="submit"
-                                                        class="inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700">Delete</button>
+                                                        class="p-2 bg-red-50 text-red-600 rounded-md hover:bg-red-600 hover:text-white transition">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">No suppliers
-                                            found.</td>
-                                    </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
-                    </div>
-
-                    <div class="mt-4">
-                        {{ $suppliers->links() }}
                     </div>
                 </div>
             </div>

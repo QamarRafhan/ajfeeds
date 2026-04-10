@@ -12,7 +12,9 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
+require __DIR__ . '/auth.php';
 
 Route::get('/clear', function () {
     Artisan::call('cache:clear');
@@ -53,6 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/orders/{order}/invoice/pdf', [ReportController::class, 'orderInvoicePdf'])->name('orders.invoice.pdf');
     Route::get('/reports/sales', [ReportController::class, 'salesReport'])->name('reports.sales');
+    Route::get('/reports/user/{user}', [ReportController::class, 'userReport'])->name('reports.user');
 
     // Admin / Staff Management
     Route::middleware([\Spatie\Permission\Middleware\RoleMiddleware::class . ':Admin'])->group(function () {
@@ -62,4 +65,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-require __DIR__.'/auth.php';

@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('user_settings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('theme_mode')->default('light_blue'); // light_blue, midnight, modern_dark
-            $table->string('sidebar_type')->default('white'); // white, navy
+            $table->string('theme_mode')->default(\App\Enums\ThemeMode::LIGHT_BLUE->value);
+            $table->string('sidebar_type')->default('full'); // white, navy
             $table->timestamps();
         });
     }

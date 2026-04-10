@@ -15,6 +15,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use App\Enums\ThemeMode;
 
 class InventorySeeder extends Seeder
 {
@@ -105,7 +106,7 @@ class InventorySeeder extends Seeder
             // Create default settings
             UserSetting::create([
                 'user_id' => $user->id,
-                'theme_mode' => 'light_blue',
+                'theme_mode' => ThemeMode::LIGHT_BLUE->value,
                 'sidebar_type' => 'full'
             ]);
         }

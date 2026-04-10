@@ -43,11 +43,26 @@ class ReportController extends Controller
             ->get();
 
         $pdf = Pdf::loadView('reports.sales', compact('orders', 'from', 'to'));
-        
+
         if ($request->has('download')) {
             return $pdf->download('sales-report-' . $from . '-to-' . $to . '.pdf');
         }
-        
+
         return $pdf->stream('sales-report-' . $from . '-to-' . $to . '.pdf');
+    }
+
+    public function userReport(\App\Models\User $user)
+    {
+        $user->load(['roles']);
+        $orders = Order::where('user_id', $user->id)->latest()->get();
+        $stats = [
+            'total_orders' => $orders->count(),
+            'completed_orders' => $orders->where('status', 'completed')->count(),
+            'total_sales' => $orders->where('status', 'completed')->sum('total_amount'),
+            'pending_orders' => $orders->where('status', 'pending')->count(),
+            'cancelled_orders' => $orders->where('status', 'cancelled')->count(),
+        ];
+
+        return view('reports.user', compact('user', 'orders', 'stats'));
     }
 }

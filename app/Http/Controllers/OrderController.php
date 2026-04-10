@@ -12,9 +12,19 @@ use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with('user')->latest()->paginate(10);
+        $query = Order::with('user');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $query->where('reference_no', 'like', '%' . $request->search . '%');
+        }
+
+        $orders = $query->latest()->get(); // Use get() because Datatables will handle paging
         return view('orders.index', compact('orders'));
     }
 
@@ -36,14 +46,14 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => auth()->id() ?? 1,
                 'reference_no' => 'ORD-' . strtoupper(Str::random(6)),
-                'status' => 'completed',
+                'status' => $request->status ?? 'pending',
                 'total_amount' => 0,
             ]);
 
             $total = 0;
             foreach ($request->items as $item) {
                 $product = Product::findOrFail($item['product_id']);
-                
+
                 if ($product->stock_quantity < $item['quantity']) {
                     throw ValidationException::withMessages([
                         'items' => "Not enough stock for {$product->name}. Only {$product->stock_quantity} remaining."
@@ -84,5 +94,21 @@ class OrderController extends Controller
     {
         $order->load('items.product', 'user');
         return view('orders.show', compact('order'));
+    }
+
+    public function edit(Order $order)
+    {
+        return view('orders.edit', compact('order'));
+    }
+
+    public function update(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,completed,cancelled',
+        ]);
+
+        $order->update(['status' => $request->status]);
+
+        return redirect()->route('orders.index')->with('success', 'Order status updated to ' . $request->status);
     }
 }

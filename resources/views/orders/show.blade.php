@@ -86,14 +86,22 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex justify-end gap-3 pt-4 border-t">
+                    <div class="flex justify-end gap-3 pt-6 border-t">
+                        <a href="{{ route('orders.edit', $order) }}"
+                            class="inline-flex items-center px-4 py-2 bg-white border border-indigo-200 rounded-md font-black text-[10px] text-indigo-700 uppercase tracking-widest hover:bg-indigo-50 transition shadow-sm">
+                            <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                            Manage Status
+                        </a>
                         <a href="{{ route('orders.invoice.pdf', $order) }}" target="_blank"
-                            class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 transition">
+                            class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-black text-[10px] text-white uppercase tracking-widest hover:bg-indigo-700 transition shadow-md">
                             <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
-                            Save PDF
+                            Download PDF
                         </a>
                         <button onclick="window.print()"
                             class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use App\Enums\ThemeMode;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -28,14 +30,14 @@ class ProfileController extends Controller
     public function toggleTheme(Request $request): RedirectResponse
     {
         $request->validate([
-            'theme_mode' => 'required|string|in:light_blue,midnight,modern_dark'
+            'theme_mode' => ['required', 'string', Rule::in(ThemeMode::values())],
         ]);
 
         $user = $request->user();
-        
+
         // Ensure settings exist (defensive)
         $settings = $user->settings()->firstOrCreate([]);
-        
+
         $settings->update([
             'theme_mode' => $request->theme_mode
         ]);
