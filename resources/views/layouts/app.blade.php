@@ -551,7 +551,7 @@
                                             ];
                                         @endphp
                                         @foreach ($themes as $t)
-                                            <button name="theme_mode" value="{{ $t['id'] }}"
+                                            <button type="submit" name="theme_mode" value="{{ $t['id'] }}"
                                                 class="group w-full text-left px-4 py-3 text-sm leading-5 text-gray-700 hover:bg-gray-100 transition flex items-center">
                                                 <span class="w-4 h-4 rounded-full mr-3 border border-gray-300 shadow-sm"
                                                     style="background-color: {{ $t['color'] }}"></span>
