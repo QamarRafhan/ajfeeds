@@ -529,35 +529,38 @@
                             </button>
                         </x-slot>
                         <x-slot name="content">
-                            <div class="px-4 py-2 text-xs font-bold text-gray-400 uppercase border-b">Premium Design
-                                Systems</div>
-                            <div class="max-h-80 overflow-y-auto">
-                                <form action="{{ route('profile.theme') }}" method="POST">
-                                    @csrf @method('PATCH')
-                                    @php
-                                        $themes = [
-                                            ['id' => 'light_blue', 'name' => 'Light Blue', 'color' => '#3b82f6'],
-                                            ['id' => 'midnight', 'name' => 'Midnight Navy', 'color' => '#0f172a'],
-                                            ['id' => 'modern_dark', 'name' => 'Modern Slate', 'color' => '#1e293b'],
-                                            ['id' => 'forest_green', 'name' => 'Forest Green', 'color' => '#10b981'],
-                                            ['id' => 'sunset_gold', 'name' => 'Sunset Gold', 'color' => '#f59e0b'],
-                                            ['id' => 'royal_purple', 'name' => 'Royal Purple', 'color' => '#8b5cf6'],
-                                            ['id' => 'ocean_teal', 'name' => 'Ocean Teal', 'color' => '#14b8a6'],
-                                            ['id' => 'rose_quartz', 'name' => 'Rose Quartz', 'color' => '#ec4899'],
-                                            ['id' => 'monochrome', 'name' => 'Monochrome', 'color' => '#18181b'],
-                                            ['id' => 'high_contrast', 'name' => 'High Contrast', 'color' => '#000000'],
-                                        ];
-                                    @endphp
-                                    @foreach ($themes as $t)
-                                        <button name="theme_mode" value="{{ $t['id'] }}"
-                                            class="group w-full text-left px-4 py-3 text-sm leading-5 text-gray-700 hover:bg-gray-100 transition flex items-center">
-                                            <span class="w-4 h-4 rounded-full mr-3 border border-gray-300 shadow-sm"
-                                                style="background-color: {{ $t['color'] }}"></span>
-                                            <span
-                                                class="group-hover:translate-x-1 transition-transform">{{ $t['name'] }}</span>
-                                        </button>
-                                    @endforeach
-                                </form>
+                            <div class="w-40"> <!-- increase width here -->
+                                <div class="px-4 py-2 text-xs font-bold text-gray-400 uppercase border-b">
+                                    Premium Design Systems
+                                </div>
+                                <div class="max-h-80 overflow-y-auto">
+                                    <form action="{{ route('profile.theme') }}" method="POST">
+                                        @csrf @method('PATCH')
+                                        @php
+                                            $themes = [
+                                                ['id' => 'light_blue', 'name' => 'Light Blue', 'color' => '#3b82f6'],
+                                                ['id' => 'midnight', 'name' => 'Midnight Navy', 'color' => '#0f172a'],
+                                                ['id' => 'modern_dark', 'name' => 'Modern Slate', 'color' => '#1e293b'],
+                                                // ['id' => 'forest_green', 'name' => 'Forest Green', 'color' => '#10b981'],
+                                                // ['id' => 'sunset_gold', 'name' => 'Sunset Gold', 'color' => '#f59e0b'],
+                                                // ['id' => 'royal_purple', 'name' => 'Royal Purple', 'color' => '#8b5cf6'],
+                                                // ['id' => 'ocean_teal', 'name' => 'Ocean Teal', 'color' => '#14b8a6'],
+                                                // ['id' => 'rose_quartz', 'name' => 'Rose Quartz', 'color' => '#ec4899'],
+                                                // ['id' => 'monochrome', 'name' => 'Monochrome', 'color' => '#18181b'],
+                                                // ['id' => 'high_contrast', 'name' => 'High Contrast', 'color' => '#000000'],
+                                            ];
+                                        @endphp
+                                        @foreach ($themes as $t)
+                                            <button name="theme_mode" value="{{ $t['id'] }}"
+                                                class="group w-full text-left px-4 py-3 text-sm leading-5 text-gray-700 hover:bg-gray-100 transition flex items-center">
+                                                <span class="w-4 h-4 rounded-full mr-3 border border-gray-300 shadow-sm"
+                                                    style="background-color: {{ $t['color'] }}"></span>
+                                                <span
+                                                    class="group-hover:translate-x-1 transition-transform">{{ $t['name'] }}</span>
+                                            </button>
+                                        @endforeach
+                                    </form>
+                                </div>
                             </div>
                         </x-slot>
                     </x-dropdown>
@@ -664,10 +667,10 @@
                         el.dispatchEvent(new Event('input'));
                     });
 
-                        Alpine.effect(() => {
-                            const value = evaluate(expression);
-                            $(el).val(value).trigger('change.select2');
-                        });
+                    Alpine.effect(() => {
+                        const value = evaluate(expression);
+                        $(el).val(value).trigger('change.select2');
+                    });
                 });
             });
 
@@ -694,35 +697,56 @@
             @endif
 
             @if (session('error'))
-                Toast.fire({
+                Swal.fire({
                     icon: 'error',
-                    title: "{!! addslashes(session('error')) !!}"
+                    title: 'Action Failed',
+                    text: "{!! addslashes(session('error')) !!}",
+                    timer: 4500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-main)',
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
                 });
             @endif
 
             @if ($errors->any())
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Form Validation Error',
-                    html: '<ul class="text-left text-sm">@foreach ($errors->all() as $e)<li>- {{ $e }}</li>@endforeach</ul>',
-                    confirmButtonColor: 'var(--primary)'
+                    icon: 'warning',
+                    title: 'Wait a second...',
+                    html: `
+                            <ul style="text-align: left; padding: 0 20px; font-size: 14px;">
+                                @foreach ($errors->all() as $error)
+                                    <li>- {{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        `,
+                    confirmButtonColor: '#4f46e5'
                 });
             @endif
 
-            // Global Delete Confirmation
+            // Global SweetAlert Delete Confirmation Interceptor
             $(document).on('submit', '.sweet-alert-delete', function(e) {
                 e.preventDefault();
+                let form = this;
+                let message = $(form).attr('data-message') || 'Are you sure you want to proceed?';
+
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
+                    title: 'Confirm Deletion',
+                    text: message,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#ef4444',
                     cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Yes, delete it!'
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        this.submit();
+                        form.submit();
                     }
                 });
             });
