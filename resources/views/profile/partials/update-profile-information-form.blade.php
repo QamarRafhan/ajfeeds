@@ -13,9 +13,9 @@
         @csrf
     </form>
 
-    <form method="POST" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
+    <form method="POST" action="{{ url('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
         @csrf
-        @method('patch')
+        {{-- @method('patch') --}}
 
         <div class="flex items-center space-x-6">
             <div class="shrink-0">
