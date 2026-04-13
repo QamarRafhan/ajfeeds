@@ -246,7 +246,8 @@
             color: var(--text-main) !important;
             border-radius: 0.375rem !important;
             padding: 0.5rem 0.75rem !important;
-            padding-left: 3rem !important; /* Fixed padding for Currency symbols like Rs. */
+            padding-left: 3rem !important;
+            /* Fixed padding for Currency symbols like Rs. */
             width: 100% !important;
             display: block !important;
         }
@@ -535,33 +536,22 @@
                                 <div class="px-4 py-2 text-xs font-bold text-gray-400 uppercase border-b">
                                     Premium Design Systems
                                 </div>
-                            <div class="max-h-80 overflow-y-auto">
-                                <form action="{{ route('profile.theme') }}" method="POST">
-                                    @csrf @method('PATCH')
-                                    @php
-                                        $themes = [
-                                            ['id' => 'light_blue', 'name' => 'Light Blue', 'color' => '#3b82f6'],
-                                            ['id' => 'midnight', 'name' => 'Midnight Navy', 'color' => '#0f172a'],
-                                            ['id' => 'modern_dark', 'name' => 'Modern Slate', 'color' => '#1e293b'],
-                                                // ['id' => 'forest_green', 'name' => 'Forest Green', 'color' => '#10b981'],
-                                                // ['id' => 'sunset_gold', 'name' => 'Sunset Gold', 'color' => '#f59e0b'],
-                                                // ['id' => 'royal_purple', 'name' => 'Royal Purple', 'color' => '#8b5cf6'],
-                                                // ['id' => 'ocean_teal', 'name' => 'Ocean Teal', 'color' => '#14b8a6'],
-                                                // ['id' => 'rose_quartz', 'name' => 'Rose Quartz', 'color' => '#ec4899'],
-                                                // ['id' => 'monochrome', 'name' => 'Monochrome', 'color' => '#18181b'],
-                                                // ['id' => 'high_contrast', 'name' => 'High Contrast', 'color' => '#000000'],
-                                        ];
-                                    @endphp
-                                    @foreach ($themes as $t)
-                                            <button name="theme_mode" value="{{ $t['id'] }}"
-                                            class="group w-full text-left px-4 py-3 text-sm leading-5 text-gray-700 hover:bg-gray-100 transition flex items-center">
-                                            <span class="w-4 h-4 rounded-full mr-3 border border-gray-300 shadow-sm"
-                                                style="background-color: {{ $t['color'] }}"></span>
-                                            <span
-                                                class="group-hover:translate-x-1 transition-transform">{{ $t['name'] }}</span>
-                                        </button>
-                                    @endforeach
-                                </form>
+                                <div class="max-h-80 overflow-y-auto">
+                                    <form action="{{ route('profile.theme') }}" method="POST">
+                                        @csrf @method('PATCH')
+
+                                        @foreach (\App\Enums\ThemeMode::cases() as $theme)
+                                            <button name="theme_mode" value="{{ $theme->value }}"
+                                                class="group w-full text-left px-4 py-3 text-sm leading-5 text-gray-700 hover:bg-gray-100 transition flex items-center">
+                                                <span class="w-4 h-4 rounded-full mr-3 border border-gray-300 shadow-sm"
+                                                    @if (optional(Auth::user()->settings)->theme_mode?->value == $theme->value) style="background-color: #3b82f6" @endif>
+                                                </span>
+                                                <span
+                                                    class="group-hover:translate-x-1 transition-transform">{{ $theme->label() }}</span>
+                                            </button>
+                                        @endforeach
+
+                                    </form>
                                 </div>
                             </div>
                         </x-slot>
@@ -657,13 +647,23 @@
 
             // Alpine.js Directives
             document.addEventListener('alpine:init', () => {
-                Alpine.directive('select2', (el, { expression }, { evaluate }) => {
-                    $(el).select2({ width: '100%' });
+                Alpine.directive('select2', (el, {
+                    expression
+                }, {
+                    evaluate
+                }) => {
+                    $(el).select2({
+                        width: '100%'
+                    });
 
                     // Dispatch a BUBBLING input event so Alpine's x-model can detect the change
-                    $(el).on('change', function () {
-                        el.dispatchEvent(new Event('input', { bubbles: true }));
-                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    $(el).on('change', function() {
+                        el.dispatchEvent(new Event('input', {
+                            bubbles: true
+                        }));
+                        el.dispatchEvent(new Event('change', {
+                            bubbles: true
+                        }));
                     });
 
                     // Only sync back to select2 display when an expression is provided
