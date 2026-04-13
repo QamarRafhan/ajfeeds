@@ -15,22 +15,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create roles
-        $adminRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Admin']);
-        $managerRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Manager']);
-        $staffRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Staff']);
-
-        // Create Admin User
-        $adminUser = User::firstOrCreate([
-            'email' => 'admin@gmail.com',
-        ], [
-            'name' => 'Admin User',
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
-        ]);
-
-        $adminUser->assignRole($adminRole);
+        // // Create roles
+        // $adminRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Admin']);
+        // // Create Admin User
+        // $adminUser = User::firstOrCreate([
+        //     'email' => 'admin@gmail.com',
+        // ], [
+        //     'name' => 'Admin User',
+        //     'password' => \Illuminate\Support\Facades\Hash::make('password'),
+        // ]);
+        // $adminUser->assignRole($adminRole);
 
         // Call full inventory seeder
         $this->call(InventorySeeder::class);
+        $this->call(CustomerSeeder::class);
     }
 }

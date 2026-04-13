@@ -23,7 +23,7 @@
                                 <div>
                                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Customer
                                         Selection</label>
-                                    <select name="customer_id" x-select2.tags class="w-full select2" required>
+                                    <select name="customer_id" id="customer_select" class="w-full select2" required>
                                         <option value="">Select Customer Name...</option>
                                         @foreach ($customers as $customer)
                                             <option value="{{ $customer->id }}">{{ $customer->name }}
@@ -31,7 +31,25 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                    {{-- <p class="mt-1 text-[10px] text-gray-400 italic font-medium">Type a name and press Enter to auto-register a new client.</p> --}}
+
+                                    {{-- Credit badge + checkbox --}}
+                                    <div x-show="creditAmount > 0"
+                                        class="mt-2 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span
+                                                class="text-[10px] font-black uppercase text-indigo-500 tracking-widest">Advance
+                                                Credit Available</span>
+                                            <span
+                                                class="text-sm font-black text-indigo-700">{{ env('CURRENCY_SIGN') }}<span
+                                                    x-text="formatNumber(creditAmount)"></span></span>
+                                        </div>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" name="use_credit" value="1" x-model="useCredit"
+                                                class="rounded">
+                                            <span class="text-xs font-bold text-indigo-700">Apply advance credit to this
+                                                order</span>
+                                        </label>
+                                    </div>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-2">
@@ -124,22 +142,51 @@
                                     Add Row
                                 </button>
 
-                                <div class="bg-indigo-600 text-white p-6 rounded-xl shadow-lg text-right min-w-[250px]">
-                                    <p class="text-[10px] font-black uppercase text-indigo-200 tracking-widest mb-1">
-                                        Grand Total</p>
-                                    <div class="text-4xl font-black mb-4">
-                                        {{ env('CURRENCY_SIGN') }}<span x-text="formatNumber(grandTotal)"></span>
+                                <div class="space-y-3 min-w-[260px]">
+                                    {{-- Overpayment → ask to add to credit --}}
+                                    <div x-show="paidAmount + (useCredit ? Math.min(creditAmount, Math.max(0, grandTotal - paidAmount)) : 0) > grandTotal && grandTotal > 0"
+                                        class="p-3 bg-amber-50 border border-amber-300 rounded-lg">
+                                        <p class="text-[10px] font-black uppercase text-amber-600 tracking-widest mb-2">
+                                            Overpayment Detected</p>
+                                        <p class="text-xs text-amber-700 mb-2">Customer paid
+                                            <strong>{{ env('CURRENCY_SIGN') }}<span
+                                                    x-text="formatNumber(paidAmount - grandTotal)"></span></strong>
+                                            extra.
+                                            Add to advance credit?
+                                        </p>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" name="add_to_credit" value="1" checked
+                                                class="rounded">
+                                            <span class="text-xs font-bold text-amber-700">Yes, add overpayment to
+                                                advance credit</span>
+                                        </label>
                                     </div>
-                                    <div class="space-y-1 text-sm border-t border-indigo-500 pt-4">
-                                        <div class="flex justify-between opacity-80">
-                                            <span>Paid:</span>
-                                            <span>{{ env('CURRENCY_SIGN') }}<span
-                                                    x-text="formatNumber(paidAmount)"></span></span>
+
+                                    {{-- Totals Card --}}
+                                    <div class="bg-indigo-600 text-white p-6 rounded-xl shadow-lg text-right">
+                                        <p
+                                            class="text-[10px] font-black uppercase text-indigo-200 tracking-widest mb-1">
+                                            Grand Total</p>
+                                        <div class="text-4xl font-black mb-4">
+                                            {{ env('CURRENCY_SIGN') }}<span x-text="formatNumber(grandTotal)"></span>
                                         </div>
-                                        <div class="flex justify-between font-black text-lg">
-                                            <span>Balance:</span>
-                                            <span>{{ env('CURRENCY_SIGN') }}<span
-                                                    x-text="formatNumber(grandTotal - paidAmount)"></span></span>
+                                        <div class="space-y-1 text-sm border-t border-indigo-500 pt-4">
+                                            <div class="flex justify-between opacity-80">
+                                                <span>Cash Paid:</span>
+                                                <span>{{ env('CURRENCY_SIGN') }}<span
+                                                        x-text="formatNumber(paidAmount)"></span></span>
+                                            </div>
+                                            <div x-show="useCredit && creditAmount > 0"
+                                                class="flex justify-between opacity-80 text-indigo-200">
+                                                <span>Credit Applied:</span>
+                                                <span>{{ env('CURRENCY_SIGN') }}<span
+                                                        x-text="formatNumber(Math.min(creditAmount, Math.max(0, grandTotal - paidAmount)))"></span></span>
+                                            </div>
+                                            <div class="flex justify-between font-black text-lg">
+                                                <span>Balance Due:</span>
+                                                <span>{{ env('CURRENCY_SIGN') }}<span
+                                                        x-text="formatNumber(Math.max(0, grandTotal - paidAmount - (useCredit ? Math.min(creditAmount, Math.max(0, grandTotal - paidAmount)) : 0)))"></span></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -165,11 +212,15 @@
             Alpine.data('orderForm', () => ({
                 items: @json(old('items', [['product_id' => '', 'quantity' => 1]])),
                 productPrices: @json($product_prices),
+                customerCredits: @json($customer_credits),
                 paidAmount: {{ old('paid_amount', 0) }},
                 grandTotal: 0,
+                selectedCustomerId: null,
+                creditAmount: 0,
+                useCredit: false,
 
                 init() {
-                    // Watch for paid_amount changes externally
+                    // Watch for paid_amount changes
                     const paidInput = document.querySelector('input[name="paid_amount"]');
                     if (paidInput) {
                         paidInput.addEventListener('input', (e) => {
@@ -178,24 +229,32 @@
                         });
                     }
 
-                    // Force initial calculation
-                    this.updateTotals();
+                    // Watch for customer selection to show credit info
+                    this.$nextTick(() => {
+                        const self = this;
+                        $('#customer_select').on('change', function() {
+                            self.selectedCustomerId = $(this).val();
+                            self.creditAmount = parseFloat(self.customerCredits[self
+                                .selectedCustomerId]) || 0;
+                            self.useCredit = self.creditAmount >
+                            0; // auto-check if credit exists
+                        });
 
-                    // Watch for quantity changes (product_id changes are handled by setProduct)
+                        self._bindSelect2Events();
+                    });
+
+                    this.updateTotals();
                     this.$watch('items', () => {
                         this.updateTotals();
-                    }, { deep: true });
-
-                    // Hook Select2 changes on product selects after DOM settles
-                    this.$nextTick(() => {
-                        this._bindSelect2Events();
+                    }, {
+                        deep: true
                     });
                 },
 
                 // Bind Select2 change events to update Alpine state directly
                 _bindSelect2Events() {
                     const self = this;
-                    $(document).on('change', 'select[name*="[product_id]"]', function () {
+                    $(document).on('change', 'select[name*="[product_id]"]', function() {
                         const name = $(this).attr('name');
                         const match = name.match(/items\[(\d+)\]\[product_id\]/);
                         if (match) {
@@ -235,10 +294,16 @@
                 },
 
                 addItem() {
-                    this.items.push({ product_id: '', quantity: 1 });
+                    this.items.push({
+                        product_id: '',
+                        quantity: 1
+                    });
                     this.$nextTick(() => {
                         // Re-initialize Select2 on newly added rows
-                        $('select[name*="[product_id]"]').not('.select2-hidden-accessible').select2({ width: '100%' });
+                        $('select[name*="[product_id]"]').not('.select2-hidden-accessible')
+                            .select2({
+                                width: '100%'
+                            });
                     });
                 },
 

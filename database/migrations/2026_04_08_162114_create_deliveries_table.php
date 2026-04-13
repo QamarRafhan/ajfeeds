@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'shipped', 'delivered'])->default('pending');
             $table->timestamp('delivery_date')->nullable();
             $table->timestamps();
+            $table->softDeletes()->index();
         });
     }
 

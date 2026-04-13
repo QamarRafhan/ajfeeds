@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('theme_mode')->default(\App\Enums\ThemeMode::LIGHT_BLUE->value);
-            $table->string('sidebar_type')->default('full'); // white, navy
             $table->timestamps();
+            $table->softDeletes()->index();
         });
     }
 

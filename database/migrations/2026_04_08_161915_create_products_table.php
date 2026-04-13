@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('min_stock_alert')->default(0);
             $table->string('image')->nullable();
             $table->timestamps();
+            $table->softDeletes()->index();
         });
     }
 

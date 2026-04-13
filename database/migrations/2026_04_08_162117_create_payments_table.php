@@ -16,8 +16,9 @@ return new class extends Migration
             $table->morphs('reference'); // reference_type, reference_id
             $table->enum('type', ['incoming', 'outgoing']);
             $table->decimal('amount', 10, 2);
-            $table->enum('method', ['Cash', 'Bank', 'Online'])->default('Cash');
+            $table->enum('method', ['Cash', 'Bank', 'Online', 'Credit'])->default('Cash');
             $table->timestamps();
+            $table->softDeletes()->index();
         });
     }
 

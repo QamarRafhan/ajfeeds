@@ -27,38 +27,47 @@
 
         <p class="px-4 pt-6 pb-2 text-xs font-bold uppercase tracking-wider text-muted">Inventory Settings</p>
 
-        <a href="{{ route('categories.index') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('categories.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
-                </path>
-            </svg>
-            Categories
-        </a>
+        @can('view.categories')
+            <a href="{{ route('categories.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('categories.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
+                    </path>
+                </svg>
+                Categories
+            </a>
+        @endcan
 
-        <a href="{{ route('products.index') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('products.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-            </svg>
-            Products
-        </a>
+        @can('view.products')
+            <a href="{{ route('products.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('products.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+                Products
+            </a>
+        @endcan
 
-        <a href="{{ route('suppliers.index') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('suppliers.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                </path>
-            </svg>
-            Brand Suppliers
-        </a>
+        @can('view.suppliers')
+            <a href="{{ route('suppliers.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('suppliers.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                    </path>
+                </svg>
+                Brand Suppliers
+            </a>
+        @endcan
 
-        <p class="px-4 pt-6 pb-2 text-xs font-bold uppercase tracking-wider text-muted">Finance & Trading</p>
 
-        @can('manage purchases')
+        @canany(['view.purchases', 'view.orders', 'view.customers'])
+            <p class="px-4 pt-6 pb-2 text-xs font-bold uppercase tracking-wider text-muted">Finance & Trading</p>
+        @endcan
+
+        @can('view.purchases')
             <a href="{{ route('purchases.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('purchases.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,7 +79,7 @@
             </a>
         @endcan
 
-        @can('manage orders')
+        @can('view.orders')
             <a href="{{ route('orders.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('orders.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,6 +88,9 @@
                 </svg>
                 Point of Sale
             </a>
+        @endcan
+
+        @can('view.customers')
             <a href="{{ route('customers.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('customers.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,9 +102,11 @@
             </a>
         @endcan
 
-        <p class="px-4 pt-6 pb-2 text-xs font-bold uppercase tracking-wider text-muted">Monitoring</p>
+        @canany(['view.staff', 'view.roles', 'view.reports'])
+            <p class="px-4 pt-6 pb-2 text-xs font-bold uppercase tracking-wider text-muted">Monitoring</p>
+        @endcan
 
-        @can('manage staff')
+        @can('view.staff')
             <a href="{{ route('users.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('users.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,7 +118,7 @@
             </a>
         @endcan
 
-        @can('manage roles')
+        @can('view.roles')
             <a href="{{ route('roles.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('roles.*') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +139,7 @@
             </a>
         @endcan
 
-        @can('view reports')
+        @can('view.reports')
             <a href="{{ route('reports.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('reports.index') ? 'bg-primary text-white shadow' : 'text-muted hover:bg-primary/10 hover:text-primary' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

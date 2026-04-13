@@ -25,7 +25,7 @@ class OrderController extends Controller
             $query->where('reference_no', 'like', '%' . $request->search . '%');
         }
 
-        $orders = $query->latest()->get(); 
+        $orders = $query->latest()->get();
         return view('orders.index', compact('orders'));
     }
 
@@ -34,40 +34,38 @@ class OrderController extends Controller
         $products = Product::where('stock_quantity', '>', 0)->get();
         $customers = Customer::all();
         $product_prices = $products->pluck('sale_price', 'id');
-        return view('orders.create', compact('products', 'customers', 'product_prices'));
+        $customer_credits = $customers->pluck('credit_balance', 'id')->map(fn($v) => (float) $v);
+        return view('orders.create', compact('products', 'customers', 'product_prices', 'customer_credits'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'customer_id' => 'required',
+            'customer_id' => 'required|exists:customers,id',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'paid_amount' => 'nullable|numeric|min:0',
+            'use_credit' => 'nullable|boolean',
+            'add_to_credit' => 'nullable|boolean',
         ]);
 
         DB::transaction(function () use ($request) {
-            $paid_amount = $request->paid_amount ?? 0;
-            
-            // // Handle Quick Add Customer with extreme care
-            // $customer_input = $request->customer_id;
-            // $customer_id = $customer_input;
-            
-            // // If the input is not numeric, or it is numeric but no such ID exists in our database,
-            // // treat it as a new customer name string and create the record.
-            // if (!is_numeric($customer_input) || !Customer::where('id', $customer_input)->exists()) {
-            //     $customer = Customer::create(['name' => $customer_input]);
-            //     $customer_id = $customer->id;
-            // }
+            $paid_amount = (float) ($request->paid_amount ?? 0);
+            $use_credit = (bool) ($request->use_credit ?? false);
+            $add_to_credit = (bool) ($request->add_to_credit ?? false);
 
+            $customerRecord = Customer::findOrFail($request->customer_id);
+            $available_credit = (float) ($customerRecord->credit_balance ?? 0);
+
+            // Build the order first with amount = 0 (we calculate total below)
             $order = Order::create([
                 'user_id' => auth()->id() ?? 1,
                 'customer_id' => $request->customer_id,
                 'reference_no' => 'ORD-' . strtoupper(Str::random(6)),
                 'status' => $request->status ?? 'pending',
                 'total_amount' => 0,
-                'paid_amount' => $paid_amount,
+                'paid_amount' => 0,
                 'payment_status' => 'unpaid',
             ]);
 
@@ -91,10 +89,8 @@ class OrderController extends Controller
                     'subtotal' => $subtotal,
                 ]);
 
-                // Decrease stock
                 $product->decrement('stock_quantity', $item['quantity']);
 
-                // Create StockLog
                 StockLog::create([
                     'product_id' => $product->id,
                     'type' => 'out',
@@ -105,31 +101,52 @@ class OrderController extends Controller
                 ]);
             }
 
-            // Determine payment status
-            if ($paid_amount >= $total) {
+            // ── Apply advance credit if requested ─────────
+            $credit_used = 0;
+            if ($use_credit && $available_credit > 0) {
+                $remaining_after_cash = max(0, $total - $paid_amount);
+                $credit_used = min($available_credit, $remaining_after_cash);
+
+                // Deduct used credit from the customer's balance immediately
+                $customerRecord->decrement('credit_balance', $credit_used);
+            }
+
+            // Effective total payment = cash paid + credit applied
+            $effective_paid = $paid_amount + $credit_used;
+
+            // ── Determine payment status ─────────
+            if ($effective_paid >= $total) {
                 $order->payment_status = 'paid';
-                
-                if ($paid_amount > $total) {
-                    // Always use the resolved $customer_id to ensure credits are saved to new customers too
-                    $customerRecord = Customer::find($request->customer_id);
-                    if ($customerRecord) {
-                        $customerRecord->increment('credit_balance', ($paid_amount - $total));
-                    }
+
+                $overpayment = $effective_paid - $total;
+                if ($overpayment > 0.009 && $add_to_credit) {
+                    // Only add to credit if user explicitly asked for it
+                    $customerRecord->increment('credit_balance', $overpayment);
                 }
-            } elseif ($paid_amount > 0) {
+            } elseif ($effective_paid > 0) {
                 $order->payment_status = 'partial';
             } else {
                 $order->payment_status = 'unpaid';
             }
 
             $order->total_amount = $total;
+            $order->paid_amount = $effective_paid; // reflect credit + cash
             $order->save();
 
+            // Record cash payment entry (not credit — credit is just a balance transfer)
             if ($paid_amount > 0) {
                 $order->payments()->create([
                     'type' => 'incoming',
                     'amount' => $paid_amount,
                     'method' => 'Cash',
+                ]);
+            }
+            // Record a credit-applied entry for transparency
+            if ($credit_used > 0) {
+                $order->payments()->create([
+                    'type' => 'incoming',
+                    'amount' => $credit_used,
+                    'method' => 'Credit',
                 ]);
             }
         });
@@ -163,13 +180,13 @@ class OrderController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:0.01',
-            'method' => 'required|in:Cash,Bank,Online',
+            'method' => 'required|in:Cash,Bank,Online,Credit',
         ]);
 
         DB::transaction(function () use ($request, $order) {
             $amount = $request->amount;
             $order->increment('paid_amount', $amount);
-            
+
             $order->refresh();
             if ($order->paid_amount >= $order->total_amount) {
                 $order->update(['payment_status' => 'paid']);

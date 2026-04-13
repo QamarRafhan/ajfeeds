@@ -29,26 +29,64 @@ class InventorySeeder extends Seeder
         Product::query()->delete();
         Category::query()->delete();
         Supplier::query()->delete();
-        
+
         // Roles & Permissions are handled by resetting permissions to ensure latest list
         Permission::query()->delete();
 
         // 2. Define Permissions
         $permissions = [
-            'view dashboard',
-            'manage inventory',
-            'manage categories',
-            'manage products',
-            'manage suppliers',
-            'manage purchases',
-            'manage orders',
-            'manage staff',
-            'manage roles',
-            'view reports',
+            ['name' => 'view.dashboard', 'group_name' => 'dashboard'],
+
+            ['name' => 'view.categories', 'group_name' => 'categories'],
+            ['name' => 'create.categories', 'group_name' => 'categories'],
+            ['name' => 'update.categories', 'group_name' => 'categories'],
+            ['name' => 'delete.categories', 'group_name' => 'categories'],
+
+            ['name' => 'view.products', 'group_name' => 'products'],
+            ['name' => 'create.products', 'group_name' => 'products'],
+            ['name' => 'update.products', 'group_name' => 'products'],
+            ['name' => 'delete.products', 'group_name' => 'products'],
+
+            ['name' => 'view.suppliers', 'group_name' => 'suppliers'],
+            ['name' => 'create.suppliers', 'group_name' => 'suppliers'],
+            ['name' => 'update.suppliers', 'group_name' => 'suppliers'],
+            ['name' => 'delete.suppliers', 'group_name' => 'suppliers'],
+
+            ['name' => 'view.purchases', 'group_name' => 'purchases'],
+            ['name' => 'create.purchases', 'group_name' => 'purchases'],
+            ['name' => 'update.purchases', 'group_name' => 'purchases'],
+            ['name' => 'delete.purchases', 'group_name' => 'purchases'],
+
+            ['name' => 'view.orders', 'group_name' => 'orders'],
+            ['name' => 'create.orders', 'group_name' => 'orders'],
+            ['name' => 'update.orders', 'group_name' => 'orders'],
+            ['name' => 'delete.orders', 'group_name' => 'orders'],
+
+            ['name' => 'view.staff', 'group_name' => 'staff'],
+            ['name' => 'create.staff', 'group_name' => 'staff'],
+            ['name' => 'update.staff', 'group_name' => 'staff'],
+            ['name' => 'delete.staff', 'group_name' => 'staff'],
+
+            ['name' => 'view.customers', 'group_name' => 'customers'],
+            ['name' => 'create.customers', 'group_name' => 'customers'],
+            ['name' => 'update.customers', 'group_name' => 'customers'],
+            ['name' => 'delete.customers', 'group_name' => 'customers'],
+
+            ['name' => 'view.roles', 'group_name' => 'roles'],
+            ['name' => 'create.roles', 'group_name' => 'roles'],
+            ['name' => 'update.roles', 'group_name' => 'roles'],
+            ['name' => 'delete.roles', 'group_name' => 'roles'],
+
+            ['name' => 'view.reports', 'group_name' => 'reports'],
+
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission, 'guard_name' => 'web']);
+            Permission::create([
+                'name' => $permission['name'],
+                'group_name' => $permission['group_name'],
+                'guard_name' => 'web',
+            ]);
         }
 
         // 3. Create Roles & Assign Permissions
@@ -56,16 +94,15 @@ class InventorySeeder extends Seeder
         $adminRole->syncPermissions(Permission::all());
 
         $managerRole = Role::firstOrCreate(['name' => 'Manager', 'guard_name' => 'web']);
-        $managerRole->syncPermissions(['view dashboard', 'manage inventory', 'manage products', 'manage suppliers', 'view reports']);
-
         $staffRole = Role::firstOrCreate(['name' => 'Staff', 'guard_name' => 'web']);
-        $staffRole->syncPermissions(['view dashboard', 'manage orders']);
+        // $staffRole->syncPermissions(['view.dashboard', 'view.products']);
+
 
         // 4. Create Users (Total 5)
         $users = [
             [
                 'name' => 'Qamar Rafhan',
-                'email' => 'admin@ajfeeds.com',
+                'email' => 'admin@gmail.com',
                 'password' => Hash::make('password'),
                 'role' => 'Admin'
             ],
@@ -102,12 +139,11 @@ class InventorySeeder extends Seeder
                 'password' => $u['password'],
             ]);
             $user->assignRole($u['role']);
-            
+
             // Create default settings
             UserSetting::create([
                 'user_id' => $user->id,
                 'theme_mode' => ThemeMode::LIGHT_BLUE->value,
-                'sidebar_type' => 'full'
             ]);
         }
 
@@ -122,7 +158,7 @@ class InventorySeeder extends Seeder
 
         // 8. Seed Sales Orders (30)
         $staffUsers = User::role(['Staff', 'Admin', 'Manager'])->get();
-        
+
         Order::factory(30)->recycle($staffUsers)->create()->each(function ($order) use ($products) {
             $itemsCount = rand(1, 4);
             $randomProducts = $products->random($itemsCount);
@@ -132,7 +168,7 @@ class InventorySeeder extends Seeder
                 $qty = rand(1, 10);
                 $price = $product->sale_price;
                 $subtotal = $price * $qty;
-                
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
@@ -140,7 +176,7 @@ class InventorySeeder extends Seeder
                     'unit_price' => $price,
                     'subtotal' => $subtotal
                 ]);
-                
+
                 $totalAmount += $subtotal;
             }
 
@@ -157,7 +193,7 @@ class InventorySeeder extends Seeder
                 $qty = rand(10, 50);
                 $price = $product->purchase_price;
                 $subtotal = $price * $qty;
-                
+
                 PurchaseItem::create([
                     'purchase_id' => $purchase->id,
                     'product_id' => $product->id,
@@ -165,7 +201,7 @@ class InventorySeeder extends Seeder
                     'unit_price' => $price,
                     'subtotal' => $subtotal
                 ]);
-                
+
                 $totalAmount += $subtotal;
             }
 
