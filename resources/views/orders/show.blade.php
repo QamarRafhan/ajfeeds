@@ -177,6 +177,7 @@
                                                 <option value="Cash">Cash</option>
                                                 <option value="Bank">Bank Transfer</option>
                                                 <option value="Online">Online Gateway</option>
+                                                <option value="Credit">Credit</option>
                                             </select>
                                         </div>
                                     </div>

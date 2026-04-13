@@ -182,7 +182,7 @@ class OrderController extends Controller
         return redirect()->route('orders.index')->with('success', 'Order status updated successfully.');
     }
 
-    public function collectPayment(Request $request, Order $order)
+    public function collectPayment2(Request $request, Order $order)
     {
         $request->validate([
             'amount' => 'required|numeric|min:0.01',
@@ -205,6 +205,71 @@ class OrderController extends Controller
                 'amount' => $amount,
                 'method' => $request->method,
             ]);
+        });
+
+        return redirect()->back()->with('success', 'Manual payment recorded successfully.');
+    }
+
+    public function collectPayment(Request $request, Order $order)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'method' => 'required|in:Cash,Bank,Online,Credit',
+        ]);
+
+        DB::transaction(function () use ($request, $order) {
+
+            $amount = (float) $request->amount;
+            $method = $request->method;
+
+            $customer = $order->customer;
+            $available_credit = (float) ($customer->credit_balance ?? 0);
+
+            $remaining = $order->total_amount - $order->paid_amount;
+
+            $cash_used = 0;
+            $credit_used = 0;
+
+            // 1. CREDIT PAYMENT
+            if ($method == 'Credit') {
+                $credit_used = min($amount, $available_credit);
+                $customer->decrement('credit_balance', $credit_used);
+                $order->increment('paid_amount', $credit_used);
+                $remaining -= $credit_used;
+            } else {
+
+                // 2. CASH / BANK / ONLINE PAYMENT
+                $cash_used = min($amount, $remaining);
+                $order->increment('paid_amount', $cash_used);
+                $remaining -= $cash_used;
+
+                // 3. OVERPAYMENT → ADD TO CREDIT
+                $overpayment = max(0, $amount - $cash_used);
+
+                if ($overpayment > 0) {
+                    $customer->increment('credit_balance', $overpayment);
+                }
+            }
+
+            // 4. PAYMENT STATUS
+            $order->refresh();
+
+            if ($order->paid_amount >= $order->total_amount) {
+                $order->update(['payment_status' => 'paid']);
+            } elseif ($order->paid_amount > 0) {
+                $order->update(['payment_status' => 'partial']);
+            } else {
+                $order->update(['payment_status' => 'unpaid']);
+            }
+
+            // 5. PAYMENT LOG
+            if ($amount > 0) {
+                $order->payments()->create([
+                    'type' => 'incoming',
+                    'amount' => ($method == 'Credit') ? $credit_used : $cash_used,
+                    'method' => $method,
+                ]);
+            }
         });
 
         return redirect()->back()->with('success', 'Manual payment recorded successfully.');
