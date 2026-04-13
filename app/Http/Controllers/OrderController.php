@@ -55,8 +55,9 @@ class OrderController extends Controller
             $use_credit = (bool) ($request->use_credit ?? false);
             $add_to_credit = (bool) ($request->add_to_credit ?? false);
 
-            $customerRecord = Customer::findOrFail($request->customer_id);
-            $available_credit = (float) ($customerRecord->credit_balance ?? 0);
+            $customer = Customer::findOrFail($request->customer_id);
+            $available_credit = (float) ($customer->credit_balance ?? 0);
+            $effective_paid = $paid_amount;
 
             // Build the order first with amount = 0 (we calculate total below)
             $order = Order::create([
@@ -101,43 +102,48 @@ class OrderController extends Controller
                 ]);
             }
 
-            // ── Apply advance credit if requested ─────────
-            $credit_used = 0;
-            if ($use_credit && $available_credit > 0) {
-                $remaining_after_cash = max(0, $total - $paid_amount);
-                $credit_used = min($available_credit, $remaining_after_cash);
+            $remaining = $total;
 
-                // Deduct used credit from the customer's balance immediately
-                $customerRecord->decrement('credit_balance', $credit_used);
+            // 1. Apply CASH FIRST
+            $cash_used = min($paid_amount, $remaining);
+            $remaining -= $cash_used;
+
+            // 2. Apply CREDIT if allowed
+            $credit_used = 0;
+            if ($use_credit && $available_credit > 0 && $remaining > 0) {
+                $credit_used = min($available_credit, $remaining); // return minimum value from both
+                $customer->decrement('credit_balance', $credit_used);
+                $remaining -= $credit_used;
+                $effective_paid += $credit_used;
             }
 
-            // Effective total payment = cash paid + credit applied
-            $effective_paid = $paid_amount + $credit_used;
+            // 3. OVERPAYMENT → ADD TO CREDIT (ONLY CASH CAN CREATE CREDIT)
+            $overpayment = max(0, $paid_amount - $total);  // return maximum value from both
 
-            // ── Determine payment status ─────────
-            if ($effective_paid >= $total) {
+            if ($overpayment > 0 && $add_to_credit) {
+                $effective_paid -= $overpayment;
+                $customer->increment('credit_balance', $overpayment);
+            }
+
+            // 4. PAYMENT STATUS
+            if ($remaining == 0) {
                 $order->payment_status = 'paid';
-
-                $overpayment = $effective_paid - $total;
-                if ($overpayment > 0.009 && $add_to_credit) {
-                    // Only add to credit if user explicitly asked for it
-                    $customerRecord->increment('credit_balance', $overpayment);
-                }
-            } elseif ($effective_paid > 0) {
+            } elseif ($cash_used + $credit_used > 0) {
                 $order->payment_status = 'partial';
             } else {
                 $order->payment_status = 'unpaid';
             }
 
+            // 5. SAVE ORDER (IMPORTANT FIX)
             $order->total_amount = $total;
-            $order->paid_amount = $effective_paid; // reflect credit + cash
+            $order->paid_amount = $effective_paid; //  ONLY CASH STORED
             $order->save();
 
-            // Record cash payment entry (not credit — credit is just a balance transfer)
-            if ($paid_amount > 0) {
+            // Record cash payment entry (not credit)
+            if ($cash_used > 0) {
                 $order->payments()->create([
                     'type' => 'incoming',
-                    'amount' => $paid_amount,
+                    'amount' => $cash_used,
                     'method' => 'Cash',
                 ]);
             }
